@@ -13,21 +13,38 @@ ArrayList<ArrayList<Point>> arrays=new ArrayList<ArrayList<Point>>();
 
 int screenWidth=1920;
 int screenHeight=1080;
+
 final int MIN_POINTS=2;
 final int MAX_POINTS=24;
+
 int points=0;
 int rectLen=7; //rect's side length
+
 boolean canPress=true;
+boolean canDraw=true;
+boolean hasLine=true;
+
 float scale=0.0;
 float scale_increment=0.005;
-color bgColor=color(255, 255, 255); //background color
-color pointColor=#3BFF6A; //point where mouse clicked
+
+color bgColor=#FFFFFF; //background color
+color pointColor=#4B4B4B; //point where mouse clicked
 color lineColor=#818181; //temp line
 color bezierColor=#FF4040; //bezier curve color
 color textColor=#989090; //text's color
 
 float distance(Point p1, Point p2) {
   return sqrt(pow(p1.x-p2.x, 2)+pow(p1.y-p2.y, 2));
+}
+
+color getColor(int i){
+  switch(i%4){
+    case 0: return #FC5757;
+    case 1: return #57ABFC;
+    case 2: return #59FC57;
+    case 3: return #FCB557;
+  }
+  return #000000;
 }
 
 void drawRect(color c, Point start, int width, int height) {
@@ -79,12 +96,15 @@ void updateArrays() {
   updateArray(bezierArray, arrays.get(size));
 }
 
-void drawLines(ArrayList<Point> array, color c, int thick) {
+void drawLines(ArrayList<Point> array, color c, int thick, boolean haveLine) {
   if (array.size()<2) return;
   int size=array.size()-1;
   for (int i=0; i<size; ++i) {
     Point p1=array.get(i);
     Point p2=array.get(i+1);
+    
+    //show line
+    if(!haveLine) continue;
     stroke(c);
     strokeWeight(thick);
     line(p1.x, p1.y, p2.x, p2.y);
@@ -92,11 +112,16 @@ void drawLines(ArrayList<Point> array, color c, int thick) {
 }
 
 void drawNewLines() {
-  drawLines(mainArray, lineColor, 2);
+  drawLines(mainArray, lineColor, 3, true);
   for (int i=0; i<points; ++i) {
-    drawLines(arrays.get(i), 200, 1);
+    drawLines(arrays.get(i), getColor(i), 1, hasLine);
   }
-  drawLines(bezierArray, bezierColor, 2);
+  drawLines(bezierArray, bezierColor, 3, true);
+  
+  //show bezier curve's rect
+  fill(bezierColor);
+  Point p=bezierArray.get(bezierArray.size()-1);
+  rect(p.x-1, p.y-1, 3, 3);
 }
 
 void drawNext() {
@@ -118,7 +143,7 @@ void drawNext() {
 
 void initArrays() {
   for (int i=0; i<MAX_POINTS; ++i) {
-    arrays.add(new ArrayList<Point>());
+    arrays.add(new ArrayList<Point>(MAX_POINTS+4));
   }
 }
 
@@ -126,7 +151,6 @@ void setup() {
   fullScreen();
   background(bgColor);
   initArrays();
-  textSize(24);
   textAlign(LEFT);
 }
 
@@ -136,6 +160,7 @@ void resetAll() {
   bezierArray.clear();
 
   canPress=true;
+  canDraw=true;
   points=0;
 }
 
@@ -145,7 +170,7 @@ void mousePressed() {
     ++points;
     drawRect(bgColor, new Point(mouseX-rectLen/2, mouseY-rectLen/2), rectLen, rectLen);
     canPress=false;
-    drawLines(mainArray, bgColor, 1);
+    drawLines(mainArray, bgColor, 1, true);
   }
   showPoint(rectLen);
 }
@@ -155,14 +180,26 @@ void mouseReleased() {
 }
 
 void keyPressed() {
+  if(key=='s'){ //stop
+    canDraw=!canDraw;
+    return;
+  }
+  if(key=='l'){ //no line
+    hasLine=!hasLine;
+    return;
+  }
   resetAll();
   drawRect(bgColor, new Point(0, 0), screenWidth, screenHeight); //clear screen
 }
 
 void draw() {
-  if (points>=MIN_POINTS) drawNext();
+  if (points>=MIN_POINTS && canDraw) drawNext();
   fill(textColor);
-  text("Bezier Curve", 64, 64);
-  text("Max: 40    Now: "+points, 64, 128);
-  text("Press any key to restart", 64, 192);
+  textSize(48);
+  text("[Bezier Curve]", 64, 64);
+  textSize(24);
+  text("Max: "+MAX_POINTS+"    Now: "+points, 64, 128);
+  text("Press 'S' to stop", 64, 192);
+  text("Press 'L' to set no lines", 64, 256);
+  text("Press others to restart", 64, 320);
 }
