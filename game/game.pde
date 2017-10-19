@@ -98,6 +98,10 @@ class Ball {
     vy=_vy;
   }
 
+  boolean behindScreen() {
+    return y>SCREEN_HEIGHT+r;
+  }
+
   void move() {
     x+=vx;
     if (x-r<0) {
@@ -112,7 +116,6 @@ class Ball {
       y=r;
       vy=-vy;
     } else if (y>SCREEN_HEIGHT+r) {
-      behindScreen=true;
       vy=-vy;
     }
   }
@@ -163,11 +166,23 @@ int barV=DEFAULT_BAR_VX;
 int barVSign=0;
 int[] keys=new int[2];
 boolean gameStart=false;
+boolean gameOver=false;
+boolean gameStop=false;
+boolean showGameInit=false;
 int score=0;
 
 //============================================================
 // function
 //============================================================
+
+void showStartTip() {
+  fill(#FF030B);
+  textAlign(CENTER);
+  textSize(36);
+  text("Press any key to start.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-80);
+  text("Use <-- and --> to control the bar.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+  text("Use UP key to stop game.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+80);
+}
 
 void clearScreen() {
   noStroke();
@@ -185,6 +200,24 @@ void initBricks() {
   }
 }
 
+void initBall() {
+  ball.set(SCREEN_WIDTH/2, SCREEN_HEIGHT-220, 16, DEFAULT_BALL_VX, DEFAULT_BALL_VY);
+}
+
+void initBar() {
+  bar.set(SCREEN_WIDTH/2-60, SCREEN_HEIGHT-100, 120, 20, 1);
+}
+
+void gameInit() {
+  clearScreen();
+  bricks.clear();
+  initBricks();
+  initBall();
+  initBar();
+  score=0;
+  showStartTip();
+}
+
 void updateBar() {
   if (keys[0]==1) {
     bar.x-=barV;
@@ -200,8 +233,26 @@ void showBricks() {
 }
 
 void keyPressed() {
-  gameStart=true;
+  //game over
+  if (gameOver) {
+    gameOver=false;
+    showGameInit=true;
+    loop();
+    return;
+  }
+  
+  //stop game
+  if (keyCode==UP) {
+    gameStop=true;
+    noLoop();
+    return;
+  }
+  
+  //other situations
   loop();
+  gameStop=false;
+  gameStart=true;
+  
   if (keyCode==LEFT) keys[0]=1;
   else if (keyCode==RIGHT) keys[1]=1;
 
@@ -228,24 +279,21 @@ void showScore() {
   text("Score: "+new Integer(score).toString(), 24, 24);
 }
 
-void gameStartTip() {
-  fill(#FF030B);
-  textAlign(CENTER);
-  textSize(36);
-  text("Press any key to start.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-40);
-  text("Use <-- and --> to control the bar.", SCREEN_WIDTH/2, SCREEN_HEIGHT/2+40);
-}
-
 void gameOver() {
+  //change status
+  noLoop();
+  gameOver=true;
+  
   clearScreen();
   textSize(72);
   fill(#FF030B);
   textAlign(CENTER);
-  text("Game Over!\nScore: "+new Integer(score).toString(), SCREEN_WIDTH/2, SCREEN_HEIGHT/2-100);
-  noLoop();
+  text("Game Over!", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-60);
+  textSize(48);
+  text("Score: "+ new Integer(score).toString(), SCREEN_WIDTH/2, SCREEN_HEIGHT/2+40);
 }
 
-void processBallBrickHit(){
+void processBallBrickHit() {
   for (int i=0; i<bricks.size(); ++i) {
     Brick b=bricks.get(i);
     if (ball.checkHit(b)) {
@@ -268,13 +316,21 @@ void setup() {
   //fullScreen();
   background(255);
   noStroke();
-  initBricks();
-  gameStartTip();
-  noLoop();
+  showGameInit=true;
 }
 
+int frame=0;
+
 void draw() {
+  if(showGameInit){
+    gameInit();
+    noLoop();
+    showGameInit=false;
+    return;
+  }
+  
   if (!gameStart) return;
+
   clearScreen();
 
   showScore();
@@ -284,14 +340,14 @@ void draw() {
   bar.show();
 
   ball.move();
-  if (ball.behindScreen) {
+  if (ball.behindScreen()) {
     gameOver();
     return;
   }
 
   if (ball.checkHit(bar)) ball.vx+=barVSign*barV/ACCELERATE_FACTOR;
   processBallBrickHit();
-  
+
   ball.show();
   showBricks();
 }
