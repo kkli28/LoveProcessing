@@ -4,35 +4,147 @@
 
 final int DEFAULT_BALL_VX=4;
 final int DEFAULT_BALL_VY=-4;
+final int DEFAULT_BALL_V=8;
+final int DEFAULT_BALL_R=8;
+final int DEFAULT_BAR_WIDTH=72;
+final int DEFAULT_BAR_HEIGHT=12;
 final int DEFAULT_BAR_VX=8;
+final int MAX_BAR_VX=16;
+final int MIN_BAR_VX=2;
+final int MAX_BAR_WIDTH=256;
+final int MIN_BAR_WIDTH=12;
 final int SCREEN_WIDTH=1200;
 final int SCREEN_HEIGHT=800;
-final int BRICK_WIDTH=80;
-final int BRICK_HEIGHT=24;
+final int DEFAULT_BRICK_WIDTH=80;
+final int DEFAULT_BRICK_HEIGHT=24;
+final int DEFAULT_BRICK_R=24;
 final int ACCELERATE_FACTOR=4;
 final int MAX_LIFE=6;
+final int MAX_DAMAGE=6;
+
+final int RECT_TYPE=0;
+final int BALL_TYPE=1;
+
+final float PROP_OCCUR_CHANCE=1;
+
+final int PROP_INCREASE_BAR_WIDTH=0;
+final int PROP_DECREASE_BAR_WIDTH=1;
+final int PROP_INCREASE_BAR_VX=2;
+final int PROP_DECREASE_BAR_VX=3;
+final int PROP_INCREASE_BALL_DAMAGE=4;
+
+final int PROP_RECT_WIDTH=64;
+final int PROP_RECT_HEIGHT=24;
+final int PROP_BALL_R=12;
+final int PROP_TEXT_SIZE=12;
+
+final int PROP_DELTA_INCREASE_WIDTH=8;
+final int PROP_DELTA_INCREASE_VX=2;
+final int PROP_DELTA_INCREASE_DAMAGE=1;
 
 //============================================================
 // Brick
 //============================================================
 
-class Brick {
-  int x;
-  int y;
-  int w;
-  int h;
-  private int life;
+class RectType {
+}
+class BallType {
+}
 
-  Brick(int _x, int _y, int _w, int _h) {
-    set(_x, _y, _w, _h, 1);
+class Prop {
+  float x;
+  float y;
+  float w;
+  float h;
+  float vy;
+  int type;
+
+  Prop(float _x, float _y) {
+    x=_x;
+    y=_y;
+    vy=2;
+    w=PROP_RECT_WIDTH;
+    h=PROP_RECT_HEIGHT;
+    type=(int)random(PROP_INCREASE_BALL_DAMAGE+1);
   }
 
-  void set(int _x, int _y, int _w, int _h, int _l) {
+  void move() {
+    y+=vy;
+  }
+
+  void show() {
+    String str="";
+    switch(type) {
+    case PROP_INCREASE_BAR_WIDTH:
+      str="<-->";
+      break;
+    case PROP_DECREASE_BAR_WIDTH:
+      str=">--<";
+      break;
+    case PROP_INCREASE_BAR_VX:
+      str="<< >>";
+      break;
+    case PROP_DECREASE_BAR_VX:
+      str=">> <<";
+      break;
+    case PROP_INCREASE_BALL_DAMAGE:
+      str="DAMAGE";
+      break;
+    default:
+      str="wtf?";
+      break;
+    }
+    fill(#FFC400);
+    textSize(PROP_TEXT_SIZE);
+    textAlign(CENTER);
+    noFill();
+    stroke(#FFC400);
+    strokeWeight(1);
+    rect(x, y, w, h);
+    text(str, x+w/2, y+h*3/4);
+    noStroke();
+  }
+}
+
+class Brick {
+  float x;
+  float y;
+
+  float w;
+  float h;
+
+  float r;
+  float vx;
+  float vy;
+  private int damage;
+
+  int type;
+  private int life;
+
+  Brick(float _x, float _y, RectType t) {
+    setRect(_x, _y, DEFAULT_BRICK_WIDTH, DEFAULT_BRICK_HEIGHT);
+  }
+
+  Brick(float _x, float _y, BallType t) {
+    type=BALL_TYPE;
+    setBall(_x, _y, DEFAULT_BRICK_R, DEFAULT_BALL_VX, DEFAULT_BALL_VY);
+  }
+
+  void setRect(float _x, float _y, float _w, float _h) {
     x=_x;
     y=_y;
     w=_w;
     h=_h;
-    life=_l;
+  }
+
+  void setBall(float _x, float _y, float _r, float _vx, float _vy) {
+    x=_x;
+    y=_y;
+    r=_r;
+    vx=_vx;
+    vy=_vy;
+    damage=1;
+    if (vy==0) vy=0.2;
   }
 
   int getLife() {
@@ -43,59 +155,17 @@ class Brick {
     life=max(0, min(lf, MAX_LIFE));
   }
 
+  int getDamage() {
+    return damage;
+  }
+
+  void setDamage(int d) {
+    damage=max(0, min(d, MAX_DAMAGE));
+  }
+
   void show() {
-    rect(x, y, w, h);
-  }
-
-  void showWithLife() {
-    switch(life) {
-    case 1: 
-      fill(#0EFF03);
-      break; //green
-    case 2: 
-      fill(#03FFD3);
-      break; //light blue
-    case 3: 
-      fill(#FEFF03);
-      break; //goden
-    case 4: 
-      fill(#FF0303);
-      break; //orange
-    case 5: 
-      fill(#5A03FF);
-      break; //blue
-    case 6: 
-      fill(#FF03C9);
-      break; //purple
-    default: 
-      break;
-    }
-    rect(x, y, w, h);
-  }
-}
-
-//============================================================
-// Ball
-//============================================================
-
-class Ball {
-  int x;
-  int y;
-  int r;
-  int vx;
-  int vy;
-  boolean behindScreen=false;
-
-  Ball(int _x, int _y, int _r) {
-    set(_x, _y, _r, DEFAULT_BALL_VX, DEFAULT_BALL_VY);
-  }
-
-  void set(int _x, int _y, int _r, int _vx, int _vy) {
-    x=_x;
-    y=_y;
-    r=_r;
-    vx=_vx;
-    vy=_vy;
+    if (type==RECT_TYPE) rect(x, y, w, h);
+    else ellipse(x, y, r+r, r+r);
   }
 
   boolean behindScreen() {
@@ -120,16 +190,11 @@ class Ball {
     }
   }
 
-  void show() {
-    fill(#FF030B);
-    ellipse(x, y, r, r);
-  }
-
-  boolean checkHit(Brick b) {
+  private boolean checkRectHit(Brick b) {
     if ((x+r)>b.x && (x-r)<(b.x+b.w)) {
       if ((y-r)<(b.y+b.h) && (y+r)>b.y) {
-        int enterXDepth=0;
-        int enterYDepth=0;
+        float enterXDepth=0;
+        float enterYDepth=0;
         if (vx>0) enterXDepth=x+r-b.x;
         else enterXDepth=b.x+b.w-(x-r);
         if (vy>0) enterYDepth=y+r-b.y;
@@ -153,6 +218,70 @@ class Ball {
     }
     return false;
   }
+
+  private void rebound(Brick b) {
+    float v1x=x-b.x;
+    float v1y=y-b.y;
+    float v2x=1;
+    float cosCelta=(v1x*v2x)/(sqrt(v1x*v1x+v1y*v1y)*sqrt(v2x*v2x));
+    float sinCelta=sin(acos(cosCelta));
+    float b1V=sqrt(vx*vx+vy*vy);
+    //float b2V=sqrt(b.vx*b.vx+b.vy*b.vy);
+    vx=b1V*cosCelta;
+    if (v1y<0) vy=-b1V*sinCelta;
+    else  vy=b1V*sinCelta;
+    //b.vx=-b2V*cosCelta;
+    //b.vy=b2V*sinCelta;
+
+    if (vx==0) vx=0.4;
+    if (vy==0) vy=0.4;
+  }
+
+  private boolean checkBallHit(Brick b) {
+    float sumR=r+b.r;
+    sumR=sumR*sumR;
+    float disX=x-b.x;
+    float disY=y-b.y;
+    float squareDis=disX*disX+disY*disY;
+
+    if (squareDis<sumR) {
+      rebound(b);
+      return true;
+    }
+    return false;
+  }
+
+  boolean checkHit(Brick b) {
+    if (b.type==RECT_TYPE) return checkRectHit(b);
+    else return checkBallHit(b);
+  }
+
+  void showWithLife() {
+    switch(life) {
+    case 1: 
+      fill(#86FFFC);
+      break;
+    case 2: 
+      fill(#FF003C);
+      break;
+    case 3: 
+      fill(#004AFF);
+      break;
+    case 4: 
+      fill(#F6FF00);
+      break;
+    case 5: 
+      fill(#FFBC00);
+      break;
+    case 6: 
+      fill(#FF4800);
+      break;
+    default: 
+      break;
+    }
+    if (type==RECT_TYPE) rect(x, y, w, h);
+    else ellipse(x, y, r+r, r+r);
+  }
 }
 
 //============================================================
@@ -160,14 +289,16 @@ class Ball {
 //============================================================
 
 ArrayList<Brick> bricks=new ArrayList<Brick>();
-Ball ball=new Ball(SCREEN_WIDTH/2, SCREEN_HEIGHT-220, 16);
-Brick bar=new Brick(SCREEN_WIDTH/2-60, SCREEN_HEIGHT-100, 120, 20);
+ArrayList<Prop> props=new ArrayList<Prop>();
+Brick ball=new Brick(SCREEN_WIDTH/2, SCREEN_HEIGHT-220, new BallType());
+Brick bar=new Brick(SCREEN_WIDTH/2-60, SCREEN_HEIGHT-100, new RectType());
 int barV=DEFAULT_BAR_VX;
 int barVSign=0;
 int[] keys=new int[2];
 boolean gameStart=false;
 boolean gameOver=false;
 boolean gameStop=false;
+boolean gameWin=false;
 boolean showGameInit=false;
 int score=0;
 
@@ -191,9 +322,21 @@ void clearScreen() {
 }
 
 void initBricks() {
-  for (int i=BRICK_WIDTH; i<SCREEN_WIDTH-200; i+=BRICK_WIDTH+20) {
-    for (int j=BRICK_HEIGHT*3; j<SCREEN_HEIGHT-400; j+=BRICK_HEIGHT+30) {
-      Brick b=new Brick(i, j, BRICK_WIDTH, BRICK_HEIGHT);
+  bricks.clear();
+  float rand=random(1);
+  int allBrickType=0;   //random type
+  if (rand<0.3) allBrickType=1;   //ball type
+  if (rand>0.7) allBrickType=2;   //rect type
+
+  for (int i=100; i<=SCREEN_WIDTH-100; i+=DEFAULT_BRICK_WIDTH+20) {
+    for (int j=DEFAULT_BRICK_HEIGHT*4; j<SCREEN_HEIGHT-400; j+=DEFAULT_BRICK_HEIGHT+30) {
+      Brick b;
+      int type;
+      if (allBrickType==1) type=BALL_TYPE;
+      else if (allBrickType==2)  type=RECT_TYPE;
+      else type=(int)random(2);
+      if (type==RECT_TYPE) b=new Brick(i-DEFAULT_BRICK_WIDTH/2, j-DEFAULT_BRICK_HEIGHT/2, new RectType());
+      else b=new Brick(i, j, new BallType());
       b.setLife((int)random(1, 7));
       bricks.add(b);
     }
@@ -201,16 +344,23 @@ void initBricks() {
 }
 
 void initBall() {
-  ball.set(SCREEN_WIDTH/2, SCREEN_HEIGHT-220, 16, DEFAULT_BALL_VX, DEFAULT_BALL_VY);
+  ball.setBall((float)SCREEN_WIDTH/2, (float)SCREEN_HEIGHT-160, (float)DEFAULT_BALL_R, (float)DEFAULT_BALL_VX, (float)DEFAULT_BALL_VY);
+  ball.damage=1;
+  ball.vx=random(2, 6);
+  if (random(1)<0.5) ball.vx=-ball.vx;
+  ball.vy=abs(ball.vx)-8;
 }
 
 void initBar() {
-  bar.set(SCREEN_WIDTH/2-60, SCREEN_HEIGHT-100, 120, 20, 1);
+  bar.setRect(SCREEN_WIDTH/2-60, SCREEN_HEIGHT-100, (float)DEFAULT_BAR_WIDTH, (float)DEFAULT_BAR_HEIGHT);
+  barV=DEFAULT_BAR_VX;
+  barVSign=0;
 }
 
 void gameInit() {
   clearScreen();
   bricks.clear();
+  props.clear();
   initBricks();
   initBall();
   initBar();
@@ -233,6 +383,9 @@ void showBricks() {
 }
 
 void keyPressed() {
+  //win
+  if(gameWin) return;
+  
   //game over
   if (gameOver) {
     gameOver=false;
@@ -240,19 +393,19 @@ void keyPressed() {
     loop();
     return;
   }
-  
+
   //stop game
   if (keyCode==UP) {
     gameStop=true;
     noLoop();
     return;
   }
-  
+
   //other situations
   loop();
   gameStop=false;
   gameStart=true;
-  
+
   if (keyCode==LEFT) keys[0]=1;
   else if (keyCode==RIGHT) keys[1]=1;
 
@@ -279,11 +432,18 @@ void showScore() {
   text("Score: "+new Integer(score).toString(), 24, 24);
 }
 
+void showBallDamage() {
+  textSize(16);
+  fill(#FF3639);
+  textAlign(LEFT);
+  text("Damage: "+new Integer(ball.damage).toString(), 128, 24);
+}
+
 void gameOver() {
   //change status
   noLoop();
   gameOver=true;
-  
+
   clearScreen();
   textSize(72);
   fill(#FF030B);
@@ -297,14 +457,76 @@ void processBallBrickHit() {
   for (int i=0; i<bricks.size(); ++i) {
     Brick b=bricks.get(i);
     if (ball.checkHit(b)) {
-      b.setLife(b.getLife()-1);
+      b.setLife(b.getLife()-ball.getDamage());
       if (b.getLife()==0) {
         bricks.remove(i);
+        if (random(1)<PROP_OCCUR_CHANCE) {
+          props.add(new Prop(b.x, b.y));
+        }
         ++score;
         --i;
       }
     }
   }
+}
+
+void updateProps() {
+  for (int i=0; i<props.size(); ++i) {
+    Prop p=props.get(i);
+    p.move();
+    if (p.y>SCREEN_HEIGHT+12) {
+      props.remove(i);
+      --i;
+    }
+  }
+}
+
+void showProps() {
+  for (Prop p : props) p.show();
+}
+
+void processBarEatProp() {
+  for (int i=0; i<props.size(); ++i) {
+    Prop p=props.get(i);
+    if ((p.x+p.w)>bar.x && p.x<(bar.x+bar.w)) {
+      if (p.y<(bar.y+bar.h) && (p.y+p.w)>bar.y) {
+        switch(p.type) {
+        case PROP_INCREASE_BAR_WIDTH:
+          bar.w=min(MAX_BAR_WIDTH, bar.w+PROP_DELTA_INCREASE_WIDTH);
+          break;
+        case PROP_DECREASE_BAR_WIDTH:
+          bar.w=max(MIN_BAR_WIDTH, bar.w-PROP_DELTA_INCREASE_WIDTH);
+          break;
+        case PROP_INCREASE_BAR_VX:
+          barV=min(MAX_BAR_VX, barV+PROP_DELTA_INCREASE_VX);
+          break;
+        case PROP_DECREASE_BAR_VX:
+          barV=max(MIN_BAR_VX, barV-PROP_DELTA_INCREASE_VX);
+        case PROP_INCREASE_BALL_DAMAGE:
+          ball.damage=min(MAX_DAMAGE, ball.damage+PROP_DELTA_INCREASE_DAMAGE);
+        default: 
+          break;
+        }
+        props.remove(i);
+        --i;
+      }
+    }
+  }
+}
+
+void Win() {
+  textSize(128);
+  fill(#FF0900);
+  textAlign(CENTER);
+  text("You Win!", SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+}
+
+void showBar(){
+  stroke(#0088FC);
+  strokeWeight(2);
+  fill(255);
+  bar.show();
+  noStroke();
 }
 
 //============================================================
@@ -322,22 +544,26 @@ void setup() {
 int frame=0;
 
 void draw() {
-  if(showGameInit){
+  if (showGameInit) {
     gameInit();
     noLoop();
     showGameInit=false;
     return;
   }
-  
+
   if (!gameStart) return;
 
   clearScreen();
 
   showScore();
+  showBallDamage();
 
   updateBar();
-  fill(#767676);
-  bar.show();
+  showBar();
+  
+  updateProps();
+  processBarEatProp();
+  showProps();
 
   ball.move();
   if (ball.behindScreen()) {
@@ -345,9 +571,20 @@ void draw() {
     return;
   }
 
-  if (ball.checkHit(bar)) ball.vx+=barVSign*barV/ACCELERATE_FACTOR;
+  if (ball.checkHit(bar)) {
+    ball.vx+=barVSign*barV/ACCELERATE_FACTOR;
+    if (ball.vx==0) ball.vx=0.4;
+  }
   processBallBrickHit();
 
+  fill(#FF2E2E);
   ball.show();
+  
   showBricks();
+
+  if (bricks.size()==0) {
+    noLoop();
+    gameWin=true;
+    Win();
+  }
 }
