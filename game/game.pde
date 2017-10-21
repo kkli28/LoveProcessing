@@ -4,7 +4,7 @@
 
 final int DEFAULT_BALL_VX=4;
 final int DEFAULT_BALL_VY=-4;
-final int DEFAULT_BALL_V=8;
+final int DEFAULT_BALL_V=12;
 final int DEFAULT_BALL_R=8;
 final int DEFAULT_BAR_WIDTH=72;
 final int DEFAULT_BAR_HEIGHT=12;
@@ -13,11 +13,11 @@ final int MAX_BAR_VX=16;
 final int MIN_BAR_VX=2;
 final int MAX_BAR_WIDTH=256;
 final int MIN_BAR_WIDTH=12;
-final int SCREEN_WIDTH=1200;
+final int SCREEN_WIDTH=1280;
 final int SCREEN_HEIGHT=800;
 final int DEFAULT_BRICK_WIDTH=80;
 final int DEFAULT_BRICK_HEIGHT=24;
-final int DEFAULT_BRICK_R=24;
+final int DEFAULT_BRICK_R=16;
 final int ACCELERATE_FACTOR=4;
 final int MAX_LIFE=6;
 final int MAX_DAMAGE=6;
@@ -25,7 +25,7 @@ final int MAX_DAMAGE=6;
 final int RECT_TYPE=0;
 final int BALL_TYPE=1;
 
-final float PROP_OCCUR_CHANCE=1;
+final float PROP_OCCUR_CHANCE=0.5;
 
 final int PROP_INCREASE_BAR_WIDTH=0;
 final int PROP_DECREASE_BAR_WIDTH=1;
@@ -38,9 +38,13 @@ final int PROP_RECT_HEIGHT=24;
 final int PROP_BALL_R=12;
 final int PROP_TEXT_SIZE=12;
 
-final int PROP_DELTA_INCREASE_WIDTH=8;
-final int PROP_DELTA_INCREASE_VX=2;
+final int PROP_DELTA_INCREASE_WIDTH=12;
+final int PROP_DELTA_INCREASE_VX=4;
 final int PROP_DELTA_INCREASE_DAMAGE=1;
+
+final int DEFAULT_WAGGLE_TIME=60;
+final float DEFAULT_WAGGLE_R=0.1;
+final float DEFAULT_WAGGLE_X=0.2;
 
 //============================================================
 // Brick
@@ -66,6 +70,7 @@ class Prop {
     w=PROP_RECT_WIDTH;
     h=PROP_RECT_HEIGHT;
     type=(int)random(PROP_INCREASE_BALL_DAMAGE+1);
+    if (type==PROP_INCREASE_BALL_DAMAGE) type=(int) random(PROP_INCREASE_BALL_DAMAGE+1);
   }
 
   void move() {
@@ -101,7 +106,7 @@ class Prop {
     stroke(#FFC400);
     strokeWeight(1);
     rect(x, y, w, h);
-    text(str, x+w/2, y+h*3/4);
+    text(str, x+w/2, y+h*2/3);
     noStroke();
   }
 }
@@ -118,16 +123,41 @@ class Brick {
   float vy;
   private int damage;
 
+  int waggleTime;
+  float deltaWaggleR;
+  float deltaWaggleX;
   int type;
   private int life;
 
   Brick(float _x, float _y, RectType t) {
     setRect(_x, _y, DEFAULT_BRICK_WIDTH, DEFAULT_BRICK_HEIGHT);
+    type=RECT_TYPE;
+    initWaggle();
   }
 
   Brick(float _x, float _y, BallType t) {
-    type=BALL_TYPE;
     setBall(_x, _y, DEFAULT_BRICK_R, DEFAULT_BALL_VX, DEFAULT_BALL_VY);
+    type=BALL_TYPE;
+    initWaggle();
+    deltaWaggleR=DEFAULT_WAGGLE_R;
+    r+=(DEFAULT_WAGGLE_TIME-waggleTime)*deltaWaggleR;
+  }
+
+  void initWaggle() {
+    waggleTime=(int)random(0, DEFAULT_WAGGLE_TIME);
+    deltaWaggleX=DEFAULT_WAGGLE_X;
+    x+=(DEFAULT_WAGGLE_TIME-waggleTime)*deltaWaggleX;
+  }
+
+  void waggle() {
+    x+=deltaWaggleX;
+    if(type==BALL_TYPE) r+=deltaWaggleR;
+    --waggleTime;
+    if (waggleTime<=0) {
+      waggleTime=60;
+      deltaWaggleR=-deltaWaggleR;
+      deltaWaggleX=-deltaWaggleX;
+    }
   }
 
   void setRect(float _x, float _y, float _w, float _h) {
@@ -226,12 +256,10 @@ class Brick {
     float cosCelta=(v1x*v2x)/(sqrt(v1x*v1x+v1y*v1y)*sqrt(v2x*v2x));
     float sinCelta=sin(acos(cosCelta));
     float b1V=sqrt(vx*vx+vy*vy);
-    //float b2V=sqrt(b.vx*b.vx+b.vy*b.vy);
+
     vx=b1V*cosCelta;
     if (v1y<0) vy=-b1V*sinCelta;
     else  vy=b1V*sinCelta;
-    //b.vx=-b2V*cosCelta;
-    //b.vy=b2V*sinCelta;
 
     if (vx==0) vx=0.4;
     if (vy==0) vy=0.4;
@@ -323,20 +351,33 @@ void clearScreen() {
 
 void initBricks() {
   bricks.clear();
-  float rand=random(1);
-  int allBrickType=0;   //random type
-  if (rand<0.3) allBrickType=1;   //ball type
-  if (rand>0.7) allBrickType=2;   //rect type
+  float rand=random(0, 1);
+  int sameType=0;   //random type
+  if (rand<0.3) sameType=1;   //ball type
+  if (rand>0.7) sameType=2;   //rect type
 
-  for (int i=100; i<=SCREEN_WIDTH-100; i+=DEFAULT_BRICK_WIDTH+20) {
-    for (int j=DEFAULT_BRICK_HEIGHT*4; j<SCREEN_HEIGHT-400; j+=DEFAULT_BRICK_HEIGHT+30) {
+  for (int i=100; i<=SCREEN_WIDTH-100; i+=DEFAULT_BRICK_WIDTH+40) {
+
+    int offset=26;
+    for (int j=DEFAULT_BRICK_HEIGHT*4; j<SCREEN_HEIGHT-300; j+=DEFAULT_BRICK_HEIGHT+30) {
       Brick b;
       int type;
-      if (allBrickType==1) type=BALL_TYPE;
-      else if (allBrickType==2)  type=RECT_TYPE;
-      else type=(int)random(2);
+      if (sameType==1) type=BALL_TYPE;
+      else if (sameType==2)  type=RECT_TYPE;
+      else {
+        type=(int)random(2);
+      }
+
       if (type==RECT_TYPE) b=new Brick(i-DEFAULT_BRICK_WIDTH/2, j-DEFAULT_BRICK_HEIGHT/2, new RectType());
-      else b=new Brick(i, j, new BallType());
+      else {
+        int x=i;
+        int y=j;
+        if (sameType==1) {
+          x+=offset;
+          offset=-offset;
+        }
+        b=new Brick(x, y, new BallType());
+      }
       b.setLife((int)random(1, 7));
       bricks.add(b);
     }
@@ -384,8 +425,8 @@ void showBricks() {
 
 void keyPressed() {
   //win
-  if(gameWin) return;
-  
+  if (gameWin) return;
+
   //game over
   if (gameOver) {
     gameOver=false;
@@ -489,7 +530,7 @@ void processBarEatProp() {
   for (int i=0; i<props.size(); ++i) {
     Prop p=props.get(i);
     if ((p.x+p.w)>bar.x && p.x<(bar.x+bar.w)) {
-      if (p.y<(bar.y+bar.h) && (p.y+p.w)>bar.y) {
+      if (p.y<(bar.y+bar.h) && (p.y+p.h)>bar.y) {
         switch(p.type) {
         case PROP_INCREASE_BAR_WIDTH:
           bar.w=min(MAX_BAR_WIDTH, bar.w+PROP_DELTA_INCREASE_WIDTH);
@@ -515,13 +556,14 @@ void processBarEatProp() {
 }
 
 void Win() {
+  clearScreen();
   textSize(128);
   fill(#FF0900);
   textAlign(CENTER);
   text("You Win!", SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
 }
 
-void showBar(){
+void showBar() {
   stroke(#0088FC);
   strokeWeight(2);
   fill(255);
@@ -529,12 +571,16 @@ void showBar(){
   noStroke();
 }
 
+void updateBricks() {
+  for (Brick b : bricks) b.waggle();
+}
+
 //============================================================
 // setup && draw
 //============================================================
 
 void setup() {
-  size(1200, 800);
+  size(1280, 800);
   //fullScreen();
   background(255);
   noStroke();
@@ -560,10 +606,8 @@ void draw() {
 
   updateBar();
   showBar();
-  
-  updateProps();
-  processBarEatProp();
-  showProps();
+
+  updateBricks();
 
   ball.move();
   if (ball.behindScreen()) {
@@ -579,8 +623,12 @@ void draw() {
 
   fill(#FF2E2E);
   ball.show();
-  
+
   showBricks();
+
+  updateProps();
+  processBarEatProp();
+  showProps();
 
   if (bricks.size()==0) {
     noLoop();
