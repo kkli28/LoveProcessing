@@ -4,7 +4,7 @@
 
 final int DEFAULT_BALL_VX=4;
 final int DEFAULT_BALL_VY=-4;
-final int DEFAULT_BALL_V=12;
+final int DEFAULT_BALL_V=8;
 final int DEFAULT_BALL_R=8;
 final int DEFAULT_BAR_WIDTH=72;
 final int DEFAULT_BAR_HEIGHT=12;
@@ -132,26 +132,22 @@ class Brick {
   Brick(float _x, float _y, RectType t) {
     setRect(_x, _y, DEFAULT_BRICK_WIDTH, DEFAULT_BRICK_HEIGHT);
     type=RECT_TYPE;
-    initWaggle();
-  }
-
-  Brick(float _x, float _y, BallType t) {
-    setBall(_x, _y, DEFAULT_BRICK_R, DEFAULT_BALL_VX, DEFAULT_BALL_VY);
-    type=BALL_TYPE;
-    initWaggle();
-    deltaWaggleR=DEFAULT_WAGGLE_R;
-    r+=(DEFAULT_WAGGLE_TIME-waggleTime)*deltaWaggleR;
-  }
-
-  void initWaggle() {
     waggleTime=(int)random(0, DEFAULT_WAGGLE_TIME);
     deltaWaggleX=DEFAULT_WAGGLE_X;
     x+=(DEFAULT_WAGGLE_TIME-waggleTime)*deltaWaggleX;
   }
 
+  Brick(float _x, float _y, BallType t) {
+    setBall(_x, _y, DEFAULT_BRICK_R, DEFAULT_BALL_VX, DEFAULT_BALL_VY);
+    type=BALL_TYPE;
+    waggleTime=(int)random(0, DEFAULT_WAGGLE_TIME);
+    deltaWaggleR=DEFAULT_WAGGLE_R;
+    r+=(DEFAULT_WAGGLE_TIME-waggleTime)*deltaWaggleR;
+  }
+
   void waggle() {
-    x+=deltaWaggleX;
-    if(type==BALL_TYPE) r+=deltaWaggleR;
+    if(type==RECT_TYPE) x+=deltaWaggleX;
+    else r+=deltaWaggleR;
     --waggleTime;
     if (waggleTime<=0) {
       waggleTime=60;
@@ -385,15 +381,15 @@ void initBricks() {
 }
 
 void initBall() {
-  ball.setBall((float)SCREEN_WIDTH/2, (float)SCREEN_HEIGHT-160, (float)DEFAULT_BALL_R, (float)DEFAULT_BALL_VX, (float)DEFAULT_BALL_VY);
+  ball.setBall((float)SCREEN_WIDTH/2, (float)SCREEN_HEIGHT-80, (float)DEFAULT_BALL_R, (float)DEFAULT_BALL_VX, (float)DEFAULT_BALL_VY);
   ball.damage=1;
   ball.vx=random(2, 6);
   if (random(1)<0.5) ball.vx=-ball.vx;
-  ball.vy=abs(ball.vx)-8;
+  ball.vy=abs(ball.vx)-DEFAULT_BALL_V;
 }
 
 void initBar() {
-  bar.setRect(SCREEN_WIDTH/2-60, SCREEN_HEIGHT-100, (float)DEFAULT_BAR_WIDTH, (float)DEFAULT_BAR_HEIGHT);
+  bar.setRect(SCREEN_WIDTH/2-60, SCREEN_HEIGHT-40, (float)DEFAULT_BAR_WIDTH, (float)DEFAULT_BAR_HEIGHT);
   barV=DEFAULT_BAR_VX;
   barVSign=0;
 }
