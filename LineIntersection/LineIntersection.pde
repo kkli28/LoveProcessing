@@ -1,13 +1,19 @@
-
+ 
 // ==== constant ====
 final int SCREEN_WIDTH=640;
 final int SCREEN_HEIGHT=640;
 final int IPR=8;
 final int LINE_COUNT=16;
-final int MOUSE_LINE_COUNT=8;
+final int MOUSE_LINE_COUNT=16;
 final int MOUSE_LINE_LENGTH=1200;
+final float DEVIATION=0.000000001f;
+final float INFINITY=100000000f;
 float beginX=SCREEN_WIDTH/2;
 float beginY=SCREEN_HEIGHT/2;
+
+boolean enableTriangle=false;
+
+int count=0;
 
 //color
 final int LINE_COLOR=200;
@@ -21,6 +27,12 @@ boolean needRefresh=true;
 
 void initLines(){
   lines.clear();
+  
+  lines.add(new Line(0,0,SCREEN_WIDTH, 0));
+  lines.add(new Line(0,0, 0, SCREEN_HEIGHT));
+  lines.add(new Line(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT));
+  lines.add(new Line(SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+  
   for(int i=0;i<LINE_COUNT;++i){
     float x1=random(SCREEN_WIDTH);
     float y1=random(SCREEN_HEIGHT);
@@ -32,7 +44,7 @@ void initLines(){
 
 void updateMouseLines(){
   mouseLines.clear();
-  float celta=0;
+  float celta=0.001;
   float deltaCelta=2*PI/MOUSE_LINE_COUNT;
   for(int i=0;i<MOUSE_LINE_COUNT;++i){
     celta+=deltaCelta;
@@ -68,6 +80,7 @@ Point __calcIntersection_aux(Line line1, Line line2){
   float b2=line2.p2.x-line2.p1.x;
   float c2=line2.p1.x*line2.p2.y-line2.p2.x*line2.p1.y;
   float D=a1*b2-a2*b1;
+  
   float x=(b1*c2-b2*c1)/D;
   float y=(a2*c1-a1*c2)/D;
   return new Point(x, y);
@@ -86,7 +99,6 @@ void processIntersection(){
        Point p=__calcIntersection_aux(l1, l2);
        if(pointInLine(l1, p) && pointInLine(l2, p)){
          mouseLines.get(j).points.add(p);
-        //points.add(p);
        }
     }
   }
@@ -95,20 +107,24 @@ void processIntersection(){
 
 void processIntersectionPoints(){
   boolean find=false;
+  float minLength=INFINITY-100;
   
-  //find the point which closest to the center of the screen
   for(Line l: mouseLines){
-    float minLength=100000000;
+    find=false;
+    minLength=INFINITY-100;
+    
     Point point=new Point(0,0);
     for(Point p: l.points){
+      if(p.x<0 || p.x>SCREEN_WIDTH) continue;
+      if(p.y<0 || p.y>SCREEN_HEIGHT) continue;
       float deltaX=p.x-beginX;
       float deltaY=p.y-beginY;
       float squareLength=deltaX*deltaX+deltaY*deltaY;
       if(squareLength<minLength){
-        minLength=squareLength;
-        point.x=p.x;
-        point.y=p.y;
-        find=true;
+          minLength=squareLength;
+          point.x=p.x;
+          point.y=p.y;
+          find=true;
       }
     }
     if(find){
@@ -130,8 +146,24 @@ void drawIntersectionPoints(){
   stroke(POINT_COLOR);
   fill(255);
   for(Point p: points) ellipse(p.x, p.y, IPR, IPR);
-  for(Line l: mouseLines)
-    for(Point p: l.points) ellipse(p.x, p.y, IPR+4, IPR+4);
+}
+
+void drawTriangles(){
+  int size=points.size();
+  if(size<2) return;
+  
+  noStroke();
+  fill(200);
+  for(int i=0;i<size-1;++i){
+    for(int j=1;j<size;++j){
+      Point p1=points.get(i);
+      Point p2=points.get(j);
+      triangle(beginX, beginY, p1.x, p1.y, p2.x, p2.y);
+    }
+  }
+  Point p1=points.get(size-1);
+  Point p2=points.get(0);
+  triangle(beginX, beginY, p1.x, p1.y, p2.x, p2.y);
 }
 
 void showTips(){
@@ -148,6 +180,7 @@ void refresh(){
   processIntersection();
   drawLines();
   drawIntersectionPoints();
+  if(enableTriangle) drawTriangles();
   showTips();
 }
 
@@ -161,7 +194,7 @@ void mouseMoved(){
 void keyPressed(){
   if(key=='s'){
     initLines();
-    refresh();
+    needRefresh=true;
   }
 }
 
