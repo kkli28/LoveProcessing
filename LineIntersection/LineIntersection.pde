@@ -3,7 +3,7 @@
 final int SCREEN_WIDTH=640;
 final int SCREEN_HEIGHT=640;
 final int IPR=8;
-final int LINE_COUNT=32;
+final int LINE_COUNT=8;
 final int MOUSE_LINE_COUNT=8;
 final int MOUSE_LINE_LENGTH=400;
 
@@ -101,6 +101,12 @@ void drawIntersectionPoints(){
   for(Point p: points) ellipse(p.x, p.y, IPR, IPR);
 }
 
+void showTips(){
+  fill(POINT_COLOR);
+  textSize(16);
+  text("Press 's' to refresh", 10,20);
+}
+
 void refresh(){
   noStroke();
   fill(255);
@@ -109,6 +115,7 @@ void refresh(){
   processIntersection();
   drawLines();
   drawIntersectionPoints();
+  showTips();
 }
 
 void mouseMoved(){
