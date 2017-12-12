@@ -1,16 +1,46 @@
 
+// ==== constant ====
+final int SCREEN_WIDTH=640;
+final int SCREEN_HEIGHT=640;
 final int IPR=8;
+final int LINE_COUNT=32;
+final int MOUSE_LINE_COUNT=8;
+final int MOUSE_LINE_LENGTH=400;
+
+//color
+final int LINE_COLOR=200;
+final int MOUSE_LINE_COLOR=#10FF00;
+final int POINT_COLOR=#FF0D00;
 
 ArrayList<Line> lines=new ArrayList<Line>();
 ArrayList<Point> points=new ArrayList<Point>();
 Point p1=new Point(0,0);
 Point p2=new Point(0,0);
-int mouseStatus=0;
-boolean needRefresh=false;
+ArrayList<Line> mouseLines=new ArrayList<Line>();
+boolean needRefresh=true;
 
 void initLines(){
-  lines.add(new Line(100,100,200,200));
-  lines.add(new Line(200,100,100,200));
+  lines.clear();
+  for(int i=0;i<LINE_COUNT;++i){
+    float x1=random(SCREEN_WIDTH);
+    float y1=random(SCREEN_HEIGHT);
+    float x2=random(SCREEN_WIDTH);
+    float y2=random(SCREEN_HEIGHT);
+    lines.add(new Line(x1, y1, x2, y2));
+  }
+}
+
+void initMouseLines(float celta, float length){
+  mouseLines.clear();
+  float deltaCelta=2*PI/MOUSE_LINE_COUNT;
+  float begX=SCREEN_WIDTH/2;
+  float begY=SCREEN_HEIGHT/2;
+  for(int i=0;i<MOUSE_LINE_COUNT;++i){
+    celta+=deltaCelta;
+    float endX=begX+cos(celta)*length;
+    float endY=begY+sin(celta)*length;
+    mouseLines.add(new Line(begX, begY, endX, endY));
+  }
 }
 
 boolean pointInLine(Line l, Point p){
@@ -20,6 +50,14 @@ boolean pointInLine(Line l, Point p){
   else{
     if(p.x<l.p2.x || p.x>l.p1.x) return false;
   }
+  
+  if(l.p1.y<l.p2.y){
+    if(p.y<l.p1.y || p.y>l.p2.y) return false;
+  }
+  else{
+    if(p.y<l.p2.y || p.y>l.p1.y) return false;
+  }
+  
   return true;
 }
 
@@ -37,28 +75,28 @@ Point __calcIntersection_aux(Line line1, Line line2){
 }
 
 void processIntersection(){
-  int size=lines.size();
-  int j=size-1;
-  for(int i=0;i<j;++i){
-     Point p=__calcIntersection_aux(lines.get(i), lines.get(j));
-     if(pointInLine(lines.get(i), p) && pointInLine(lines.get(j), p)){
-       points.add(p);
-     }
+  points.clear();
+  int size1=lines.size();
+  int size2=mouseLines.size();
+  for(int i=0;i<size1;++i){
+    for(int j=0;j<size2;++j){
+       Point p=__calcIntersection_aux(lines.get(i), mouseLines.get(j));
+       if(pointInLine(lines.get(i), p) && pointInLine(mouseLines.get(j), p)){
+         points.add(p);
+       }
+    }
   }
 }
 
-void clearLinesAndPoints(){
-  lines.clear();
-  points.clear();
-}
-
 void drawLines(){
-  stroke(200);
+  stroke(LINE_COLOR);
   for(Line l: lines) line(l.p1.x, l.p1.y, l.p2.x, l.p2.y);
+  stroke(MOUSE_LINE_COLOR);
+  for(Line ml: mouseLines) line(ml.p1.x, ml.p1.y, ml.p2.x, ml.p2.y);
 }
 
 void drawIntersectionPoints(){
-  stroke(#FF0000);
+  stroke(POINT_COLOR);
   fill(255);
   for(Point p: points) ellipse(p.x, p.y, IPR, IPR);
 }
@@ -66,47 +104,40 @@ void drawIntersectionPoints(){
 void refresh(){
   noStroke();
   fill(255);
-  rect(0,0,640,640);
+  rect(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
   
   processIntersection();
   drawLines();
   drawIntersectionPoints();
 }
 
-void mousePressed(){
-  if(mouseStatus!=0) return;
-  p1.x=mouseX;
-  p1.y=mouseY;
-  mouseStatus=1;
+void mouseMoved(){
+  float deltaX=mouseX-SCREEN_WIDTH/2;
+  float deltaY=mouseY-SCREEN_HEIGHT/2;
+  float celta=atan(deltaY/deltaX);
+  float length=sqrt(deltaX*deltaX + deltaY*deltaY);
+  initMouseLines(celta, length);
   needRefresh=true;
 }
 
-void mouseReleased(){
-  if(mouseStatus!=1) return;
-  p2.x=mouseX;
-  p2.y=mouseY;
-  lines.add(new Line(p1.x, p1.y, p2.x, p2.y));
-  mouseStatus=0;
-}
-
 void keyPressed(){
-  if(key=='s') lines.clear();
-  refresh();
+  if(key=='s'){
+    initLines();
+    initMouseLines(0.0, MOUSE_LINE_LENGTH);
+    refresh();
+  }
 }
 
 void setup(){
   size(640,640);
   background(255);
   
-  //initLines();
+  initLines();
+  initMouseLines(0.0, MOUSE_LINE_LENGTH);
   refresh();
 }
 
 void draw(){
   if(needRefresh) refresh();
-  if(mouseStatus==1) {
-    stroke(200);
-    line(p1.x, p1.y, mouseX, mouseY);
-  }
   else needRefresh=false;
 }
