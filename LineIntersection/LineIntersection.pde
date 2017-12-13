@@ -195,8 +195,10 @@ void showTips(){
   fill(POINT_COLOR);
   textSize(16);
   text("Press 'a' to reset", 10,20);
-  text("Press 's' to enable/disable points", 10, 40);
-  text("Press 'd' to change line count", 10, 60);
+  text("Press 's' to change line count", 10, 40);
+  text("Press 'd' to enable/disable points", 10, 60);
+  text("Press 'f' to enable/disable triangle", 10, 80);
+  text("lines: "+getMouseLineCount(), 10, SCREEN_HEIGHT-20);
 }
 
 void refresh(){
@@ -224,13 +226,17 @@ void keyPressed(){
     initLines();
   }
   else if(key=='s'){
-    enableIntersectionPoint=!enableIntersectionPoint;
-  }
-  else if(key=='d'){
     ++mouseLineIndex;
+    if(mouseLineIndex>1) enableTriangle=false;
     if(mouseLineIndex>MOUSE_LINE_MAX_INDEX) mouseLineIndex=0;
     updateMouseLines();
-  } 
+  }
+  else if(key=='d'){
+    enableIntersectionPoint=!enableIntersectionPoint;
+  }
+  else if(key=='f' && mouseLineIndex<=1){
+    enableTriangle=!enableTriangle;
+  }
 }
 
 void setup(){
