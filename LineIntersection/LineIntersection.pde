@@ -1,10 +1,18 @@
  
 // ==== constant ====
-final int SCREEN_WIDTH=640;
-final int SCREEN_HEIGHT=640;
+final int SCREEN_WIDTH=720;
+final int SCREEN_HEIGHT=720;
 final int IPR=8;
 final int LINE_COUNT=16;
-final int MOUSE_LINE_COUNT=16;
+
+int mouseLineIndex=1;
+final int MOUSE_LINE_MAX_INDEX=4;
+final int MOUSE_LINE_COUNT0=5;
+final int MOUSE_LINE_COUNT1=16;
+final int MOUSE_LINE_COUNT2=64;
+final int MOUSE_LINE_COUNT3=128;
+final int MOUSE_LINE_COUNT4=512;
+
 final int MOUSE_LINE_LENGTH=1200;
 final float DEVIATION=0.000000001f;
 final float INFINITY=100000000f;
@@ -12,6 +20,7 @@ float beginX=SCREEN_WIDTH/2;
 float beginY=SCREEN_HEIGHT/2;
 
 boolean enableTriangle=false;
+boolean enableIntersectionPoint=true;
 
 int count=0;
 
@@ -42,11 +51,24 @@ void initLines(){
   }
 }
 
+int getMouseLineCount(){
+  switch(mouseLineIndex){
+    case 0: return MOUSE_LINE_COUNT0;
+    case 1: return MOUSE_LINE_COUNT1;
+    case 2: return MOUSE_LINE_COUNT2;
+    case 3: return MOUSE_LINE_COUNT3;
+    case 4: return MOUSE_LINE_COUNT4;
+    default: return MOUSE_LINE_COUNT0;
+  }
+}
+
 void updateMouseLines(){
   mouseLines.clear();
+  int lineCount=getMouseLineCount();
+  
   float celta=0.001;
-  float deltaCelta=2*PI/MOUSE_LINE_COUNT;
-  for(int i=0;i<MOUSE_LINE_COUNT;++i){
+  float deltaCelta=2*PI/lineCount;
+  for(int i=0;i<lineCount;++i){
     celta+=deltaCelta;
     float endX=beginX+cos(celta)*MOUSE_LINE_LENGTH;
     float endY=beginY+sin(celta)*MOUSE_LINE_LENGTH;
@@ -143,8 +165,11 @@ void drawLines(){
 }
 
 void drawIntersectionPoints(){
+  if(!enableIntersectionPoint) return;
+  
   stroke(POINT_COLOR);
   fill(255);
+  //for(Line l: mouseLines) for(Point p: l.points) ellipse(p.x, p.y, IPR, IPR);
   for(Point p: points) ellipse(p.x, p.y, IPR, IPR);
 }
 
@@ -169,7 +194,9 @@ void drawTriangles(){
 void showTips(){
   fill(POINT_COLOR);
   textSize(16);
-  text("Press 's' to refresh", 10,20);
+  text("Press 'a' to reset", 10,20);
+  text("Press 's' to enable/disable points", 10, 40);
+  text("Press 'd' to change line count", 10, 60);
 }
 
 void refresh(){
@@ -192,14 +219,22 @@ void mouseMoved(){
 }
 
 void keyPressed(){
-  if(key=='s'){
-    initLines();
     needRefresh=true;
+  if(key=='a'){
+    initLines();
   }
+  else if(key=='s'){
+    enableIntersectionPoint=!enableIntersectionPoint;
+  }
+  else if(key=='d'){
+    ++mouseLineIndex;
+    if(mouseLineIndex>MOUSE_LINE_MAX_INDEX) mouseLineIndex=0;
+    updateMouseLines();
+  } 
 }
 
 void setup(){
-  size(640,640);
+  size(720,720);
   background(255);
   
   initLines();
