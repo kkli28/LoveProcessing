@@ -29,7 +29,7 @@ float getNormalizeRadian(float radian){
 //collisionDetection
 boolean collisionDetection(Plane plane, Bullet bullet){
   float halfPW=PLANE_WIDTH/2;
-  float halfBW=BULLET_RADIUS/2;
+  float halfBW=bullet.radius/2;
   
   //plane
   float pLeft=plane.pos.x-halfPW;

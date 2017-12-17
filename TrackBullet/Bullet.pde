@@ -9,8 +9,9 @@ class Bullet{
   boolean dead;
   boolean isTrack;
   boolean enableCollision;
+  boolean isBigBullet;
   
-  Bullet(Point _pos, float _v, int r){
+  Bullet(Point _pos, float _v, int r, boolean big){
     pos=new Point(_pos);
     trackPos=new Point(random(SCREEN_WIDTH), random(SCREEN_HEIGHT));
     radian=0.0f;
@@ -21,11 +22,22 @@ class Bullet{
     dead=false;
     isTrack=false;
     enableCollision=false;
+    isBigBullet=big;
   }
   
   private void show(){
-    stroke(BULLET_COLOR);
-    noFill();
+    /*
+    if(isBigBullet) {
+      noStroke();
+      fill(BIG_BULLET_COLOR);
+    }
+    else{
+      stroke(SMALL_BULLET_COLOR);
+      fill(255);
+    }
+    */
+    noStroke();
+    fill(isBigBullet?BIG_BULLET_COLOR: SMALL_BULLET_COLOR);
     ellipse(pos.x, pos.y, radius, radius);
   }
   
