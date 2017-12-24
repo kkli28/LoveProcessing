@@ -1,3 +1,4 @@
+
 class Point{
   float x;
   float y;
@@ -11,10 +12,9 @@ class Point{
     x=p.x;
     y=p.y;
   }
-}
-
-float getSquareDistance(Point p1, Point p2){
-  float deltaX=p1.x-p2.x;
-  float deltaY=p1.y-p2.y;
-  return deltaX*deltaX+deltaY*deltaY;
+  
+  Point(){
+    x=0.0f;
+    y=0.0f;
+  }
 }

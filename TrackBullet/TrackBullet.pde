@@ -11,7 +11,7 @@ final int TEXT_COLOR=#02B72A;
 
 //==== plane ====
 final int PLANE_WIDTH=20;
-final Point PLANE_VELOCITY=new Point(random(2, 4), random(2, 4));
+final int MAX_PLANE_COUNT=20;
 
 //==== bullet ====
 final float DELTA_ROTATE_RADIAN=0.1;
@@ -20,7 +20,7 @@ final boolean BIG_BULLET=true;
 final boolean SMALL_BULLET=false;
 final int BULLET_LIFE=600;
 
-final int MAX_BULLET_PER_FRAME_POWER=4;
+final int MAX_BULLET_PER_FRAME_POWER=6;
 final int MAX_BIG_BULLET_COUNT=int(pow(2, MAX_BULLET_PER_FRAME_POWER)*60);
 
 final int SMALL_BULLET_PER_BIG_BULLET=3;
@@ -37,9 +37,10 @@ int bulletsPerFrame=1;
 ArrayList<Plane> planes=new ArrayList<Plane>();
 ArrayList<Bullet> bigBullets=new ArrayList<Bullet>();
 ArrayList<Bullet> smallBullets=new ArrayList<Bullet>();
-Plane plane=new Plane(new Point(SCREEN_WIDTH/2, SCREEN_HEIGHT/2), PLANE_VELOCITY);
 boolean generateBullet=false;
 boolean continuousGenerateBullet=false;
+boolean canAddPlane=false;
+boolean enableBulletExplosion=true;
 
 //initBullets
 void initBullets() {
@@ -56,6 +57,11 @@ void initBullets() {
     b.dead=true;
     smallBullets.add(b);
   }
+}
+
+//getPlaneVelocity
+Point getPlaneVelocity(){
+  return new Point(random(2 ,4), random(2, 4));
 }
 
 //addBigBullet
@@ -81,6 +87,24 @@ void addSmallBullets(Point pos) {
         smallBullets.set(j, b);
         break;
       }
+    }
+  }
+}
+
+//addPlane
+void addPlane(){
+  if(planes.size()>MAX_PLANE_COUNT) return;
+  planes.add(new Plane(new Point(random(SCREEN_WIDTH), random(SCREEN_HEIGHT)), getPlaneVelocity()));
+}
+
+//trackPlane
+void trackPlane(Bullet b){
+  float minDis=1000000;
+  for(Plane p: planes){
+    float dis=getSquareDistance(b.pos, p.pos);
+    if(dis<minDis){
+      minDis=dis;
+      b.track(p.pos);
     }
   }
 }
@@ -112,13 +136,28 @@ void mouseWheel(MouseEvent event) {
   bulletsPerFrame=int(pow(2, bulletsPerFramePower));
 }
 
+//keyPressed
+void keyPressed(){
+  if(key=='a' && canAddPlane) addPlane();
+  else if(key=='s') enableBulletExplosion=!enableBulletExplosion;
+  canAddPlane=false;
+}
+
+//keyReleased
+void keyReleased(){
+  canAddPlane=true;
+}
+
 //bigBulletsCollisionWithPlane
 void bigBulletsCollisionWithPlane() {
   for (int i=0; i<MAX_BIG_BULLET_COUNT; ++i) {
     if (bigBullets.get(i).dead) continue;
-    if (collisionDetection(plane, bigBullets.get(i))) {
-      bigBullets.get(i).dead=true;
-      addSmallBullets(bigBullets.get(i).pos);
+    for(Plane plane: planes){
+      if (collisionDetection(plane, bigBullets.get(i))) {
+        bigBullets.get(i).dead=true;
+        if(enableBulletExplosion) addSmallBullets(bigBullets.get(i).pos);
+        break;
+      }
     }
   }
 }
@@ -128,8 +167,11 @@ void smallBulletsCollisionWithPlane() {
   for (int i=0; i<MAX_SMALL_BULLET_COUNT; ++i) {
     Bullet b=smallBullets.get(i);
     if (b.dead) continue;
-    if (b.enableCollision && collisionDetection(plane, b)) {
-      smallBullets.get(i).dead=true;
+    for(Plane plane: planes){
+      if (b.enableCollision && collisionDetection(plane, b)) {
+        smallBullets.get(i).dead=true;
+        break;
+      }
     }
   }
 }
@@ -139,8 +181,10 @@ void showTexts() {
   fill(TEXT_COLOR);
   textSize(16);
   text("Scroll wheel to change bullets generate rate.", 20, 20);
-  text("Right click to enable/disable continuous generate.", 20, 42);
+  text("Right click to enable/disable continuous generate.", 20, 40);
   text("bullets/click: "+new Integer(bulletsPerFrame).toString(), 20, SCREEN_HEIGHT-20);
+  text("Press A to add plane.", 20, 60);
+  text("Press S to enable/disable bullet explosion.", 20, 80);
 }
 
 //setup
@@ -148,6 +192,7 @@ void setup() {
   size(720, 720);
   background(255);
   initBullets();
+  addPlane();
 }
 
 //draw
@@ -158,14 +203,15 @@ void draw() {
   bigBulletsCollisionWithPlane();
   smallBulletsCollisionWithPlane();
 
-  plane.update();
+  //planes
+  for(Plane p: planes) p.update();
 
   //big bullets
-  for (Bullet b : bigBullets) if (!b.dead) b.track(plane.pos);
+  for (Bullet b : bigBullets) trackPlane(b);
   for (Bullet b : bigBullets) if (!b.dead) b.update();
 
   //small bullets
-  for (Bullet b : smallBullets) if (!b.dead && b.enableCollision) b.track(plane.pos);
+  for (Bullet b : smallBullets) if (!b.dead && b.enableCollision) trackPlane(b);
   for (Bullet b : smallBullets) if (!b.dead) b.update();
 
   //generate bullets
