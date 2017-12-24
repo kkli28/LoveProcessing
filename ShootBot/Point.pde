@@ -48,7 +48,7 @@ float getTrackRadian(Point p1, Point p2){
     float deltaX=p2.x-p1.x;
     float deltaY=p2.y-p1.y;
     float cosA=deltaX/sqrt(deltaX*deltaX+deltaY*deltaY);
-    if(deltaY>0) return 2*PI-acos(cosA);
+    if(deltaY>0) return TWO_PI-acos(cosA);
     else return acos(cosA);
 }
 

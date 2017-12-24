@@ -4,7 +4,7 @@ final int SCREEN_WIDTH=960;
 final int SCREEN_HEIGHT=960;
 
 //==== Bullet ====
-final int BULLET_COLOR=#00FF0E;
+final int BULLET_COLOR=#080000;
 final int BULLET_LIFE=300;
 final int BULLET_VELOCITY=8;
 final int BULLET_MAX_COUNT=600;
@@ -12,8 +12,8 @@ final float BULLET_R=4;
 
 //==== Plane ====
 final int PLANE_COLOR=#0046FF;
-final int PLANE_WIDTH=8;
-final int PLANE_MAX_V=4;
+final int PLANE_WIDTH=32;
+final int PLANE_MAX_V=2;
 final int PLANE_MIN_V=1;
 final int PLANE_MAX_COUNT=20;
 
@@ -24,8 +24,8 @@ final int BOT_WANDER_TIME_MAX=60;
 final int BOT_WANDER_TIME_MIN=10;
 final int BOT_COLOR=#FF0303;
 final int BOT_R=8;
-final int BOT_MAX_COUNT=8;
-final int BOT_VELOCITY=6;
+final int BOT_MAX_COUNT=128;
+final int BOT_VELOCITY=4;
 final float BOT_WANDER_VELOCITY_MAX=2;
 final float BOT_WANDER_VELOCITY_MIN=0.5;
 final int BOT_SHOOT_CD=30;
@@ -62,17 +62,17 @@ void initWTF(){
 
 //addPlane
 void addPlane(){
-    for(int i=0;i<planes.size();++i){
-        if(!planes.get(i).enable) {
-            Point pos=new Point(random(SCREEN_WIDTH), random(SCREEN_HEIGHT));
-            float vx=random(PLANE_MIN_V, PLANE_MAX_V);
-            float vy=random(PLANE_MIN_V, PLANE_MAX_V);
-            if(random(-1, 1)<0) vx=-vx;
-            if(random(-1, 1)<0) vy=-vy;
-            planes.set(i, new Plane(pos, new Point(vx, vy)));
-            return;
-        }
-    }
+  for(int i=0;i<planes.size();++i){
+      if(!planes.get(i).enable) {
+          Point pos=new Point(random(SCREEN_WIDTH), random(SCREEN_HEIGHT));
+          float vx=random(PLANE_MIN_V, PLANE_MAX_V);
+          float vy=random(PLANE_MIN_V, PLANE_MAX_V);
+          if(random(-1, 1)<0) vx=-vx;
+          if(random(-1, 1)<0) vy=-vy;
+          planes.set(i, new Plane(pos, new Point(vx, vy)));
+          return;
+      }
+   }
 }
 
 //addBot
@@ -95,21 +95,12 @@ void addBullet(Bullet bullet){
     }
 }
 
-//keyPressed
-void keyPressed(){
-    if(key=='a'){
-        enableAddPlane=true;
-    }
-    else if(key=='s'){
-        enableAddBot=true;
-    }
-}
-
 //getMinDistancePlane
 Plane getMinDistancePlane(Point pos){
-    float minDistance=10000f;
+    float minDistance=10000000000000000f;
     Plane plane=new Plane();
     for(Plane p: planes){
+        if(!p.enable) continue;
         float dis=getSquareDistance(pos, p.pos);
         if(dis<minDistance){
             minDistance=dis;
@@ -156,24 +147,47 @@ void countValidThings(){
   println("Bullets: ", bulletCount);
 }
 
+//mouseReleased
+void mouseReleased(){
+  enableAddPlane=true;
+  enableAddBot=true;
+}
+
 //setup
 void setup(){
     size(960, 960);
     background(255);
     initWTF();
-    countValidThings();
+    //countValidThings();
+}
+
+void keyReleased(){
+  loop();
 }
 
 //draw
 void draw(){
     clearScreen();
-
-    if(enableAddPlane) addPlane();
-    if(enableAddBot) addBot();
-
+  
+    if(keyPressed) noLoop();
+    
+    if(mousePressed){
+      if(mouseButton==LEFT && enableAddPlane) {
+        addPlane();
+        enableAddPlane=false;
+      }
+      else if(mouseButton==RIGHT && enableAddBot){
+        addBot();
+        bots.get(0).pos=new Point(mouseX, mouseY);
+        enableAddBot=false;
+      }
+    }
+    
     for(Plane p: planes) p.update();
     for(Bot b: bots) {
         Plane plane=getMinDistancePlane(b.pos);
+        fill(#FF0000);
+        ellipse(plane.pos.x, plane.pos.y, 28, 28);
         b.track(plane.pos);
         b.update();
         Bullet bullet=b.shoot();

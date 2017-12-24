@@ -62,21 +62,18 @@ class Bot{
       }
       else return new Bullet();
     }
-
+    
     void update(){
         if(!enable) return;
         float distance=getSquareDistance(pos, trackPos);
-        float radian=getTrackRadian(pos, trackPos);
-        if(distance<BOT_TRACK_DISTANCE_MIN){
-            radian=-radian;
-        }
-        
-        if(distance>BOT_TRACK_DISTANCE_MAX){
+        if(distance>BOT_TRACK_DISTANCE_MAX*BOT_TRACK_DISTANCE_MAX){
+            float radian=getTrackRadian(pos, trackPos);
             pos.x+=cos(radian)*v;
-            pos.y+=sin(radian)*v;
+            pos.y-=sin(radian)*v;
+            wanderTimeTotal=0;
         }
         else{
-            wander();
+            //wander();
         }
         
         show();
