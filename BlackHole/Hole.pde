@@ -1,12 +1,4 @@
 
-final int HOLE_ELLIPSE_COLOR=#0057FF;
-final int HOLE_ELLIPSE_COUNT=8;
-final int HOLE_ELLIPSE_MAX_R=240;
-final int HOLE_ELLIPSE_MIN_R=4;
-final int HOLE_ATTRACTION=4;
-final int HOLE_UPDATE_CYCLE=1;
-final float HOLE_ELLIPSE_DELTA_R=0.5;
-
 class Radius{
   float r;
   Radius(float _r){
@@ -30,9 +22,10 @@ class Hole{
   }
   
   private void show(){
-    stroke(HOLE_ELLIPSE_COLOR);
     noFill();
     for(Radius radius: rs) {
+      int i=HOLE_ELLIPSE_COUNT-int(radius.r/HOLE_DELTA_R);
+      stroke(MAX_R-i*DELTA_R, MAX_G-i*DELTA_G, 0xff);
       ellipse(pos.x, pos.y, radius.r, radius.r);
     }
   }
@@ -41,7 +34,7 @@ class Hole{
     if(++cycle>=HOLE_UPDATE_CYCLE){
       cycle=0;
       for(Radius radius: rs) {
-        radius.r-=HOLE_ELLIPSE_DELTA_R;
+        radius.r-=hole_ellipse_delta_r;
         if(radius.r<HOLE_ELLIPSE_MIN_R) radius.r+=HOLE_ELLIPSE_MAX_R;
       }
     }
