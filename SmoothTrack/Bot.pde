@@ -66,7 +66,6 @@ class Bot{
             ellipse(p.x, p.y, BOT_GUN_RADIUS, BOT_GUN_RADIUS);
         }
     }
-
     
     //getAccelerate
     float getAccelerate(float distance){
