@@ -15,20 +15,20 @@ class Particle{
     void update(){
         pos.x+=velocity.x;
         pos.y+=velocity.y;
-        if(pos.x<BORDER) {
-          pos.x=BORDER;
+        if(pos.x<BORDER_PARTICLE) {
+          pos.x=BORDER_PARTICLE;
           velocity.x=-velocity.x;
         }
-        else if(pos.x>SCREEN_WIDTH-BORDER) {
-          pos.x=SCREEN_WIDTH-BORDER;
+        else if(pos.x>SCREEN_WIDTH-BORDER_PARTICLE) {
+          pos.x=SCREEN_WIDTH-BORDER_PARTICLE;
           velocity.x=-velocity.x;
         }
-        if(pos.y<BORDER) {
-          pos.y=BORDER;
+        if(pos.y<BORDER_PARTICLE) {
+          pos.y=BORDER_PARTICLE;
           velocity.y=-velocity.y;
         }
-        else if(pos.y>SCREEN_HEIGHT-BORDER){
-          pos.y=SCREEN_HEIGHT-BORDER;
+        else if(pos.y>SCREEN_HEIGHT-BORDER_PARTICLE){
+          pos.y=SCREEN_HEIGHT-BORDER_PARTICLE;
           velocity.y=-velocity.y;
         }
         
