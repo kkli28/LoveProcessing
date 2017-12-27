@@ -5,7 +5,7 @@ final int SCREEN_HEIGHT=720;
 
 //==== bullet ====
 final float BULLET_DELTA_ROTATE=0.4f;
-final float BULLET_SIDE_LEN1=8;
+final float BULLET_SIDE_LEN1=12;
 final float BULLET_SIDE_LEN2=BULLET_SIDE_LEN1;
 final int BULLET_COLOR=#07810F;
 final int BULLET_MAX_VELOCITY=16;

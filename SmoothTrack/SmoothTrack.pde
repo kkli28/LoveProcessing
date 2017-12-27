@@ -3,7 +3,7 @@
 final int SCREEN_WIDTH=720;
 final int SCREEN_HEIGHT=720;
 
-final int BOT_GUN_COUNT=4;
+final int BOT_GUN_COUNT=8;
 final float BOT_GUN_DELTA_RADIAN=TWO_PI/BOT_GUN_COUNT;
 final int BOT_SIDE_LENGTH=24;
 final float BOT_VELOCITY_MAX=4.0f;
