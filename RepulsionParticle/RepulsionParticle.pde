@@ -30,6 +30,7 @@ boolean negForce=false;
 //==== function ====
 
 void initParticles(){
+    particles.clear();
     for(int i=0;i<PARTICLE_MAX_COUNT;++i) {
         particles.add(new Particle());
     }
@@ -76,6 +77,7 @@ void showText(){
     fill(TEXT_COLOR);
     text("Scroll wheel to change effect range.", 10, 40);
     text("Mouse click to exchange attract/repel.", 10, 60);
+    text("Press any key to reset.", 10, 80);
 }
 
 void mouseWheel(MouseEvent event) {
@@ -83,6 +85,10 @@ void mouseWheel(MouseEvent event) {
   else MOUSE_MAX_RADIUS-=4;
   if(MOUSE_MAX_RADIUS>360) MOUSE_MAX_RADIUS=360;
   else if(MOUSE_MAX_RADIUS<MOUSE_MIN_RADIUS+2) MOUSE_MAX_RADIUS=MOUSE_MIN_RADIUS+2;
+}
+
+void keyPressed(){
+  initParticles();
 }
 
 void mousePressed(){
