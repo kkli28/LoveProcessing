@@ -4,10 +4,18 @@ final int SCREEN_WIDTH=720;
 final int SCREEN_HEIGHT=720;
 
 //==== color ====
-final int BIG_BULLET_COLOR=#FF0000;
-final int SMALL_BULLET_COLOR=#FF4800;
 final int PLANE_COLOR=#037EFF;
 final int TEXT_COLOR=#02B72A;
+
+final int BIG_BULLET_COLOR=#FF0000;
+final int SMALL_BULLET_COLOR=#FF4800;
+final int BIG_BULLET_LINE_COLOR=#02BC00;
+final int SMALL_BULLET_LINE_COLOR=#00D16A;
+
+final int BIG_BULLET_LINE_LENGTH=24;
+final int SMALL_BULLET_LINE_LENGTH=12;
+final int BIG_BULLET_LINE_WEIGHT=4;
+final int SMALL_BULLET_LINE_WEIGHT=2;
 
 //==== plane ====
 final int PLANE_WIDTH=20;
@@ -30,17 +38,34 @@ final int DISABLE_COLLISION_TIME=4;
 final int BIG_BULLET_RADIUS=8;
 final int SMALL_BULLET_RADIUS=4;
 
-int bulletsPerFramePower=0;
-int bulletsPerFrame=1;
-
 //==== variables ====
 ArrayList<Plane> planes=new ArrayList<Plane>();
 ArrayList<Bullet> bigBullets=new ArrayList<Bullet>();
 ArrayList<Bullet> smallBullets=new ArrayList<Bullet>();
+
 boolean generateBullet=false;
+boolean isLineBullet=false;
 boolean continuousGenerateBullet=false;
 boolean canAddPlane=false;
 boolean enableBulletExplosion=true;
+
+int bulletsPerFramePower=0;
+int bulletsPerFrame=1;
+
+//reset
+void reset(){
+  planes.clear();
+  addPlane();
+  for(Bullet b: bigBullets) b.dead=true;
+  for(Bullet b: smallBullets) b.dead=true;
+  generateBullet=false;
+  isLineBullet=false;
+  continuousGenerateBullet=false;
+  canAddPlane=false;
+  enableBulletExplosion=true;
+  bulletsPerFramePower=0;
+  bulletsPerFrame=1;
+}
 
 //initBullets
 void initBullets() {
@@ -140,6 +165,8 @@ void mouseWheel(MouseEvent event) {
 void keyPressed(){
   if(key=='a' && canAddPlane) addPlane();
   else if(key=='s') enableBulletExplosion=!enableBulletExplosion;
+  else if(key=='d') isLineBullet=!isLineBullet;
+  else if(key=='f') reset();
   canAddPlane=false;
 }
 
@@ -180,11 +207,15 @@ void smallBulletsCollisionWithPlane() {
 void showTexts() {
   fill(TEXT_COLOR);
   textSize(16);
-  text("Scroll wheel to change bullets generate rate.", 20, 20);
+  text("Left click to generate bullet.", 20, 20);
   text("Right click to enable/disable continuous generate.", 20, 40);
+  text("Scroll wheel to change bullet generate rate.", 20, 60);
+  text("Press A to add plane.", 20, 70);
+  text("Press S to enable/disable bullet explosion.", 20, 100);
+  text("Press D to exchange bullet type.", 20, 120);
+  text("Press F to reset.", 20, 140);
+  
   text("bullets/click: "+new Integer(bulletsPerFrame).toString(), 20, SCREEN_HEIGHT-20);
-  text("Press A to add plane.", 20, 60);
-  text("Press S to enable/disable bullet explosion.", 20, 80);
 }
 
 //setup

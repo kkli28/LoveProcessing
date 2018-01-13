@@ -25,6 +25,21 @@ class Bullet{
     isBigBullet=big;
   }
   
+  private void showLineBullet(){
+    float lineLength=isBigBullet?BIG_BULLET_LINE_LENGTH: SMALL_BULLET_LINE_LENGTH;
+    stroke(isBigBullet?BIG_BULLET_LINE_COLOR: SMALL_BULLET_LINE_COLOR);
+    strokeWeight(isBigBullet? BIG_BULLET_LINE_WEIGHT: SMALL_BULLET_LINE_WEIGHT);
+    Point p1=getPoint(pos, radian, lineLength/2);
+    Point p2=getPoint(pos, PI+radian, lineLength/2);
+    line(p1.x, p1.y, p2.x, p2.y);
+  }
+  
+  private void showRoundBullet(){
+    noStroke();
+    fill(isBigBullet?BIG_BULLET_COLOR: SMALL_BULLET_COLOR);
+    ellipse(pos.x, pos.y, radius, radius);
+  }
+  
   private void show(){
     /*
     if(isBigBullet) {
@@ -36,9 +51,8 @@ class Bullet{
       fill(255);
     }
     */
-    noStroke();
-    fill(isBigBullet?BIG_BULLET_COLOR: SMALL_BULLET_COLOR);
-    ellipse(pos.x, pos.y, radius, radius);
+    if(isLineBullet) showLineBullet();
+    else showRoundBullet();
   }
   
   void track(Point p){ trackPos=p; isTrack=true; }

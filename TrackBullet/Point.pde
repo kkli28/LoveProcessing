@@ -18,3 +18,9 @@ float getSquareDistance(Point p1, Point p2){
   float deltaY=p1.y-p2.y;
   return deltaX*deltaX+deltaY*deltaY;
 }
+
+Point getPoint(Point p, float radian, float len){
+  float x=len*cos(radian);
+  float y=len*sin(radian);
+  return new Point(p.x+x, p.y-y);
+}
