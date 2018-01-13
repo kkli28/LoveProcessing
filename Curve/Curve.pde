@@ -4,8 +4,8 @@
 final int SCREEN_WIDTH=720;
 final int SCREEN_HEIGHT=720;
 
-final float DELTA_RADIAN=1;
-final int DELTA_LENGTH=64;
+final float DELTA_RADIAN=0.06;
+final int DELTA_LENGTH=12;
 final float POINT_R=8;
 final float DEFAULT_RADIAN=PI/2;
 final int LINE_COLOR=#03FA5B;
@@ -32,9 +32,9 @@ void setup(){
 
 void draw(){
     clearScreen();
-    if(mousePressed){
+   // if(mousePressed){
        c=new C(DEFAULT_POINT, new Point(mouseX, mouseY));
-    }
+   // }
     println(c.points.size());
     c.draw();
 }

@@ -25,7 +25,7 @@ float getRadian(Point p1, Point p2){
 Point getPoint(Point p1, float radian, float len){
     float x=len*cos(radian);
     float y=len*sin(radian);
-    return new Point(p1.x+x, p1.y+y);
+    return new Point(p1.x+x, p1.y-y);
 }
 
 //getDistance
@@ -33,6 +33,25 @@ float getDistance(Point p1, Point p2){
     float x=p1.x-p2.x;
     float y=p1.y-p2.y;
     return sqrt(x*x+y*y);
+}
+
+
+//getNormalizeRadian
+float getNormalizeRadian(float radian){
+  if(radian>0 && radian<2*PI) return radian;
+  
+  if(radian<0){
+    int c=int((-radian)/(2*PI))+1;
+    radian+=c*2*PI;
+  }
+  
+  //radian >= 2*PI
+  else{
+    int c=int(radian/(2*PI));
+    radian-=c*2*PI;
+  }
+  
+  return radian;
 }
 
 class C{
@@ -50,7 +69,7 @@ class C{
         int i=0;
         while(!finished) {
           println(i++);
-          if(i==100) break;
+          if(i==40) break;
           calcPoints();
         }
     }
@@ -59,36 +78,50 @@ class C{
         float old_radian=DEFAULT_RADIAN;
         int size=points.size();
         if(size==0) {
-          println("WTF0");
           return;
         }
         if(size!=1){
-            old_radian=getRadian(points.get(size-1), points.get(size-2));
+            old_radian=getRadian(points.get(size-2), points.get(size-1));
         }
+        
         float new_radian=getRadian(points.get(size-1), end);
-        if(abs(new_radian-old_radian)>=DELTA_RADIAN){
-            if(new_radian>old_radian) old_radian+=DELTA_RADIAN;
-            else old_radian-=DELTA_RADIAN;
+        old_radian=getNormalizeRadian(old_radian);
+        new_radian=getNormalizeRadian(new_radian);
+        float diff_radian=old_radian>new_radian? old_radian-new_radian: new_radian-old_radian;
+        
+        boolean neg=false;
+        if(old_radian>new_radian){
+          if(diff_radian>PI) diff_radian=TWO_PI-diff_radian;
+          else neg=true;
         }
         else{
+          //old_radian<new_radian
+          if(diff_radian>PI){
+            diff_radian=TWO_PI-diff_radian;
+            neg=true;
+          }
+        }
+        if(diff_radian<DELTA_RADIAN) {
             old_radian=new_radian;
-            if(getDistance(points.get(size-1), end)<DELTA_LENGTH){
-                points.add(end);
-                finished=true;
-                return;
+            if(getDistance(points.get(size-1), end)<=DELTA_LENGTH){
+              points.add(end);
+              finished=true;
+              return;
             }
         }
+        else{
+          old_radian=neg?old_radian-DELTA_RADIAN: old_radian+DELTA_RADIAN;
+        }
+        
         points.add(getPoint(points.get(size-1), old_radian, DELTA_LENGTH));
     }
 
     void draw(){
         int size=points.size();
         if(size==0) {
-          println("WTF1");
           return;
         }
         if(size==1) {
-          println("WTF2");
           return;
         }
         --size;
@@ -105,6 +138,7 @@ class C{
         for(int i=0;i<=size;++i){
             p1=points.get(i);
             ellipse(p1.x, p1.y, POINT_R, POINT_R);
+            //text(i, p1.x, p1.y);
         }
     }
 }
