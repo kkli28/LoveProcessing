@@ -1,14 +1,14 @@
 
 //==== screen ====
-final int SCREEN_WIDTH=720;
-final int SCREEN_HEIGHT=720;
+final int SCREEN_WIDTH=960;
+final int SCREEN_HEIGHT=960;
 
 //==== color ====
-final int PLANE_COLOR=#037EFF;
+final int PLANE_COLOR=#0017FF;
 final int TEXT_COLOR=#02B72A;
 
 final int BIG_BULLET_COLOR=#FF0000;
-final int SMALL_BULLET_COLOR=#FF4800;
+final int SMALL_BULLET_COLOR=#FF00E6;
 final int BIG_BULLET_LINE_COLOR=#02BC00;
 final int SMALL_BULLET_LINE_COLOR=#00D16A;
 
@@ -35,8 +35,8 @@ final int SMALL_BULLET_PER_BIG_BULLET=3;
 final int MAX_SMALL_BULLET_COUNT=MAX_BIG_BULLET_COUNT*SMALL_BULLET_PER_BIG_BULLET;
 
 final int DISABLE_COLLISION_TIME=4;
-final int BIG_BULLET_RADIUS=8;
-final int SMALL_BULLET_RADIUS=4;
+final int BIG_BULLET_RADIUS=12;
+final int SMALL_BULLET_RADIUS=6;
 
 //==== variables ====
 ArrayList<Plane> planes=new ArrayList<Plane>();
@@ -220,7 +220,7 @@ void showTexts() {
 
 //setup
 void setup() {
-  size(720, 720);
+  size(960, 960);
   background(255);
   initBullets();
   addPlane();

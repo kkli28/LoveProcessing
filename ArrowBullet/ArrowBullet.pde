@@ -7,10 +7,10 @@ final int BULLET_COLOR1=#00FF1F;
 final int BULLET_COLOR2=#FF4646;
 final float BULLET_LINE1=48;
 final float BULLET_LINE2=BULLET_LINE1/4;
-final float GRAVITY=0.98;
+final float GRAVITY=0.98*0.8;
 final int BULLET_COUNT=4800;
 final float BULLET_VELOCITY_X_MAX=12;
-final float BULLET_VELOCITY_X_MIN=2;
+final float BULLET_VELOCITY_X_MIN=6;
 
 final int SHOOT_LEFT=0;
 final int SHOOT_RIGHT=1;
