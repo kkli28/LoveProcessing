@@ -51,16 +51,7 @@ class Brick{
             case BRICK_VIRTUAL_MOVE: setAttr(true, BRICK_VIRTUAL_COLOR); break;
             default: break;
         }
-        validPosition();
         dead=false;
-    }
-
-    private void validPosition(){
-        float hbw=BRICK_WIDTH/2;
-        if(pos.x<hbw) pos.x=hbw;
-        else if(pos.x>SCREEN_WIDTH-hbw) pos.x=SCREEN_WIDTH-hbw;
-        if(pos.y<MIN_HEIGHT) pos.y=MIN_HEIGHT;
-        else if(pos.y>MAX_HEIGHT)pos.y=MAX_HEIGHT;
     }
 
     private void setAttr(boolean cm, int bc){
@@ -95,8 +86,6 @@ class Brick{
             }
         }
         pos.y+=BRICK_DOWN_HEIGHT;
-        nowHeight+=BRICK_DOWN_HEIGHT;
-        reachHeight+=BRICK_DOWN_HEIGHT;
         if(pos.y>SCREEN_HEIGHT+BRICK_HEIGHT) dead=true;
         else show();
     }
