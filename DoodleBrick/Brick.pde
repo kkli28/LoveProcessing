@@ -66,8 +66,8 @@ class Brick{
         float hbw=BRICK_WIDTH/2;
         float hbh=BRICK_HEIGHT/2;
         rect(pos.x-hbw, pos.y-hbh, BRICK_WIDTH, BRICK_HEIGHT);
-        textSize(14);
-        text(id, pos.x, pos.y);
+        //textSize(14);
+        //text(id, pos.x, pos.y);
     }
 
     void update(){

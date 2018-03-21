@@ -21,8 +21,8 @@ class Particle{
     }
 
     void multi(float factor){
-        if(len<PARTICLE_LENGTH_MIN && factor<1) return;
-        if(len>PARTICLE_LENGTH_MAX && factor>1) return;
+        //if(len<PARTICLE_LENGTH_MIN && factor<1) return;
+        //if(len>PARTICLE_LENGTH_MAX && factor>1) return;
         len*=factor;
     }
     
