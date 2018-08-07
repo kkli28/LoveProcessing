@@ -4,7 +4,7 @@
 final int SCREEN_WIDTH=720;
 final int SCREEN_HEIGHT=720;
 
-final float DELTA_RADIAN=0.06;
+final float DELTA_RADIAN=0.12;
 final int DELTA_LENGTH=12;
 final float POINT_R=8;
 final float DEFAULT_RADIAN=PI/2;
