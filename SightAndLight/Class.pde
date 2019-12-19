@@ -14,7 +14,6 @@ class Point
 }
 
 
-
 class Segment
 {
   Point start;
@@ -41,7 +40,6 @@ class Segment
     t = 1;
   }
 }
-
 
 
 class Polygon
@@ -75,12 +73,5 @@ class Polygon
       s.endShape(CLOSE);
       shape(s);
     }
-    
-    int endI = size - 1;
-    //DrawSegment(new Segment(vertexs.get(0), vertexs.get(endI)));
-    //for (int i = 0; i < endI; ++i)
-    //{
-    //  DrawSegment(new Segment(vertexs.get(i), vertexs.get(i+1)));
-    //}
   }
 }
