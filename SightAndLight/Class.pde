@@ -58,17 +58,15 @@ class Polygon
   
   void Draw(boolean fill, color c)
   {
-    int size = vertexs.size();
     if (fill)
     {
       PShape s = createShape();
       s.beginShape();
       s.fill(c);
       //s.noStroke();
-      for (int i = 0; i < size; ++i)
+      for (Point point: vertexs)
       {
-        Point p = vertexs.get(i);
-        s.vertex(p.x, p.y);
+        s.vertex(point.x, point.y);
       }
       s.endShape(CLOSE);
       shape(s);
