@@ -1,4 +1,4 @@
-int SCREEN_WIDTH = 760;
+int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 760;
 ArrayList<Polygon> obstacles;
 ArrayList<Segment> mouseSegments;
@@ -6,7 +6,7 @@ ArrayList<Segment> mouseSegments;
 
 void setup()
 {
-  size(760, 760);
+  size(1281, 761);
 }
 
 
@@ -18,5 +18,5 @@ void draw()
   {
     polygon.Draw(true, #FFFFFF);
   }
-  mouseSegments = DrawMouseSegments(obstacles);
+  //mouseSegments = DrawMouseSegments(obstacles);
 }

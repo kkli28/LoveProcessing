@@ -45,10 +45,13 @@ class Segment
 class Polygon
 {
   ArrayList<Point> vertexs;
+  boolean isBorder;
+  ArrayList<Segment> segments;
   
   Polygon()
   {
     vertexs = new ArrayList<Point>();
+    isBorder = false;
   }
   
   void Add(Point point)
@@ -62,7 +65,14 @@ class Polygon
     {
       PShape s = createShape();
       s.beginShape();
-      s.fill(c);
+      if (isBorder)
+      {
+        s.fill(255);
+      }
+      else
+      {
+        s.fill(0, 0, 0, 128);
+      }
       //s.noStroke();
       for (Point point: vertexs)
       {
@@ -70,6 +80,18 @@ class Polygon
       }
       s.endShape(CLOSE);
       shape(s);
+    }
+  }
+
+  void GenerateSegments()
+  {
+    int endI = vertexs.size() - 1;
+    for (int i = 0; i < endI; ++i)
+    {
+      Point p1 = vertexs.get(i);
+      Point p2 = vertexs.get(i + 1);
+      Segment seg = new Segmnent(p1, p2.x - p1.x, p2.y - p1.y, 1);
+      segments.add(seg);
     }
   }
 }
