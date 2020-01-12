@@ -27,6 +27,5 @@ void draw()
   mouseSegments = GetMouseSegments(obstacles);
   UpdateMouseSegments(obstacles, mouseSegments);
   DrawLightRegion(mouseSegments);
-  fill(255);
-  ellipse(mouseX, mouseY, 16, 16);
+  ellipse(mousex, mouse.y, 16, 16);
 }

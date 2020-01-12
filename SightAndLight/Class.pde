@@ -21,6 +21,7 @@ class Segment
   float dx;
   float dy;
   float t;
+  float radian;
   
   Segment(Point _start, float _dx, float _dy, float _t)
   {
@@ -29,6 +30,7 @@ class Segment
     dy = _dy;
     t = _t;
     end = new Point(start.x + dx * t, start.y + dy * t);
+    radian = atan2(dy, dx);
   }
   
   Segment(Point _start, Point _end)
@@ -38,6 +40,13 @@ class Segment
     dx = end.x - start.x;
     dy = end.y - start.y;
     t = 1;
+    radian = atan2(dy, dx);
+  }
+
+  public void SetT(float _t)
+  {
+    t = _t;
+    end = new Point(start.x + dx * t, start.y + dy * t);
   }
 }
 
@@ -45,12 +54,13 @@ class Segment
 class Polygon
 {
   ArrayList<Point> vertexs;
-  boolean isBorder;
   ArrayList<Segment> segments;
+  boolean isBorder;
   
   Polygon()
   {
     vertexs = new ArrayList<Point>();
+    segments = new ArrayList<Segment>();
     isBorder = false;
   }
   
@@ -90,8 +100,12 @@ class Polygon
     {
       Point p1 = vertexs.get(i);
       Point p2 = vertexs.get(i + 1);
-      Segment seg = new Segmnent(p1, p2.x - p1.x, p2.y - p1.y, 1);
+      Segment seg = new Segment(p1, p2.x - p1.x, p2.y - p1.y, 1);
       segments.add(seg);
     }
+    Point p1 = vertexs.get(endI);
+    Point p2 = vertexs.get(0);
+    Segment seg = new Segment(p1, p2.x - p1.x, p2.y - p1.y, 1);
+    segments.add(seg);
   }
 }

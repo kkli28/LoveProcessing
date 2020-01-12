@@ -23,7 +23,7 @@ void DrawSegment(Segment seg)
 }
 
 
-ArrayList<Segment> DrawMouseSegments(ArrayList<Polygon> obstacles)
+ArrayList<Segment> GetMouseSegments(ArrayList<Polygon> obstacles)
 {
   ArrayList<Segment> segments = new ArrayList<Segment>();
   Point mousePos = new Point(mouseX, mouseY);
@@ -35,39 +35,91 @@ ArrayList<Segment> DrawMouseSegments(ArrayList<Polygon> obstacles)
       float dy = p.y - mousePos.y;
       Segment seg = new Segment(new Point(mousePos.x, mousePos.y), dx, dy, 1);
       segments.add(seg);
-      DrawSegment(seg);
+
+      Point offset1 = new Point(0, 0);
+      Point offset2 = new Point(0, 0);
+      if (abs(dx) < abs(dy))
+      {
+        offset1.x = -0.1;
+        offset2.x = 0.1;
+      }
+      else
+      {
+        offset1.y = -0.1;
+        offset2.y = 0.1;
+      }
+      dx = p.x + offset1.x - mousePos.x;
+      dy = p.y + offset1.y - mousePos.y;
+      seg = new Segment(new Point(mousePos.x, mousePos.y), dx, dy, 1);
+      segments.add(seg);
+
+      dx = p.x + offset2.x - mousePos.x;
+      dy = p.y + offset2.y - mousePos.y;
+      seg = new Segment(new Point(mousePos.x, mousePos.y), dx, dy, 1);
+      segments.add(seg);
     }
   }
   return segments;
-  
-  ArrayList<Segment> segments = new ArrayList<Segment>();
-  Point startPos = new Point(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-  Point mousePos = new Point(mouseX, mouseY);
-  float dx = mousePos.x - startPos.x;
-  float dy = mousePos.y - startPos.y;
-  float t = 10000;
-  for (Polygon polygon: obstacles)
-  {
-    ArrayList<Segment> segments = polygon.segments;
+}
 
-    // T2 = (r_dx*(s_py-r_py) + r_dy*(r_px-s_px))/(s_dx*r_dy - s_dy*r_dx)
-    // 带入 T2 得到 T1
-    // T1 = (s_px+s_dx*T2-r_px)/r_dx
-    // 求出最小的 t
+
+void UpdateMouseSegments(ArrayList<Polygon> obstacles, ArrayList<Segment> mouseSegments)
+{
+  for (Segment mouseSegment: mouseSegments)
+  {
+    float min = FLOAT_MAX;
+    for (Polygon polygon: obstacles)
+    {
+      for (Segment polygonSegment: polygon.segments)
+      {
+        float x1 = mouseSegment.start.x;
+        float y1 = mouseSegment.start.y;
+        float dx1 = mouseSegment.dx;
+        float dy1 = mouseSegment.dy;
+        float t1 = mouseSegment.t;
+        float x2 = polygonSegment.start.x;
+        float y2 = polygonSegment.start.y;
+        float dx2 = polygonSegment.dx;
+        float dy2 = polygonSegment.dy;
+        float t2 = polygonSegment.t;
+        
+        // not parallel
+        if (abs(x1 - x2) > PRECISION || abs(y1 - y2) > PRECISION)
+        {
+          t1 = (dy2 * (x1 - x2) + dx2 * (y2 - y1)) / (dy1 * dx2 - dy2 * dx1);
+          if (abs(dy2) <= PRECISION)
+          {
+            t2 = (x1 - x2 + dx1 * t1) / dx2;
+          }
+          else
+          {
+            t2 = (y1 - y2 + dy1 * t1) / dy2;
+          }
+
+          boolean t2Condition = t2 > -PRECISION && t2 < (polygonSegment.t + PRECISION);
+          if (t1 > PRECISION && t1 < min && (Float.isNaN(t2) || t2Condition))
+          {
+            min = t1;
+          }
+        }
+      }
+    }
+    mouseSegment.SetT(min);
+    DrawSegment(mouseSegment);
   }
-  Segment mouseSeg = new Segment(startPos, dx, dy, t);
 }
 
 
 ArrayList<Polygon> InitObstacles()
 {
   ArrayList<Polygon> obstacles = new ArrayList<Polygon>();
-  
+
   Polygon window = new Polygon();
   window.Add(new Point(2, 2));
   window.Add(new Point(SCREEN_WIDTH - 2, 2));
   window.Add(new Point(SCREEN_WIDTH - 2, SCREEN_HEIGHT - 2));
   window.Add(new Point(2, SCREEN_HEIGHT - 2));
+  window.GenerateSegments();
   window.isBorder = true;
   obstacles.add(window);
   
@@ -83,7 +135,7 @@ ArrayList<Polygon> InitObstacles()
   int[] data10 = {960, 80, 1200, 80, 1200, 160, 960, 160};
   int[] data11 = {1040, 240, 1200, 240, 1240, 320, 1240, 400, 1120, 480, 1200, 400};
   int[] data12 = {720, 640, 880, 560, 960, 640, 1040, 560, 1120, 640, 1200, 560, 1200, 720, 1120, 720, 1040, 640, 960, 720, 880, 640, 800, 720};
-  int[] data13 = {480, 320, 640, 400, 560, 560};
+  // int[] data13 = {480, 320, 640, 400, 560, 560};
   
   ArrayList<int[]> datas = new ArrayList<int[]>();
   datas.add(data1);
@@ -98,9 +150,9 @@ ArrayList<Polygon> InitObstacles()
   datas.add(data10);
   datas.add(data11);
   datas.add(data12);
-  datas.add(data13);
+  // datas.add(data13);
 
-  for (int i = 0; i < 13; ++i)
+  for (int i = 0; i < 12; ++i)
   {
     int[] data = datas.get(i);
     int length = data.length / 2;
@@ -113,4 +165,27 @@ ArrayList<Polygon> InitObstacles()
     obstacles.add(polygon);
   }
   return obstacles;
+}
+
+
+void DrawLightRegion(ArrayList<Segment> mouseSegments)
+{
+  Comparator<Segment> comparator = new Comparator<Segment>(){
+    @Override
+    public int compare(Segment seg1, Segment seg2){
+      return seg1.radian > seg2.radian ? 1 : -1;
+    }
+  };
+  mouseSegments.sort(comparator);
+
+  PShape s = createShape();
+  s.beginShape();
+  s.fill(0, 0, 255, 255);
+  s.noStroke();
+  for (Segment seg: mouseSegments)
+  {
+    s.vertex(seg.end.x, seg.end.y);
+  }
+  s.endShape(CLOSE);
+  shape(s);
 }
