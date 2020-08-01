@@ -1,9 +1,9 @@
 int WIDTH = 1200;
 int HEIGHT = 1200;
-int CELL_SIZE = 12;
+int CELL_SIZE = 24;
 int XPOINT_COUNT = WIDTH / CELL_SIZE + 1;
 int YPOINT_COUNT = HEIGHT / CELL_SIZE + 1;
-int CIRCLE_COUNT = 24;
+int CIRCLE_COUNT = 16;
 
 ArrayList<Circle> arrayCircles = new ArrayList<Circle>();
 ArrayList<ArrayList<Point>> arrayPoints = new ArrayList<ArrayList<Point>>();
@@ -144,7 +144,7 @@ class Point {
     }
     void Draw()
     {
-        point(x, y);
+        ellipse(x, y, 2, 2);
     }
 }
 
@@ -218,7 +218,6 @@ class Cell
 void setup()
 {
     size(1200, 1200);
-    noFill();
     init();
 }
 
@@ -269,9 +268,9 @@ void init()
 
     for (int i = 0; i < CIRCLE_COUNT; ++i)
     {
-        float vx = random(1, 5);
-        float vy = random(1, 5);
-        arrayCircles.add(new Circle(random(200, WIDTH - 200), random(200, HEIGHT - 200), random(40, 100), random(-vx, vx), random(-vy, vy)));
+        float vx = random(0.5, 2);
+        float vy = random(0.5, 2);
+        arrayCircles.add(new Circle(random(200, WIDTH - 200), random(200, HEIGHT - 200), random(60, 120), random(-vx, vx), random(-vy, vy)));
     }
 }
 
@@ -284,8 +283,20 @@ void draw()
     calcPoints();
 
     // draw
-    // drawCircles();
-    // drawPoints();
+    fill(0);
+    stroke(224);
+    strokeWeight(1);
+    drawGrids();
+
+    stroke(192);
+    drawPoints();
+
+    noFill();
+    stroke(192);
+    drawCircles();
+
+    stroke(#00ff00);
+    strokeWeight(4);
     drawCells();
 }
 
@@ -312,18 +323,32 @@ void calcPoints()
                 float dx = c.x - p.x;
                 float dy = c.y - p.y;
                 float d = sqrt(dx * dx + dy * dy);
-                float depth = abs(d - c.r);
                 if (d < c.r)
                 {
                     p.inner = true;
-                    p.depth = depth;
                 }
-                else if (d < p.depth)
+                float depth = d - c.r;
+                if (depth < p.depth)
                 {
                     p.depth = depth;
                 }
             }
+            p.depth = abs(p.depth);
         }
+    }
+}
+
+void drawGrids()
+{
+    for (int i = 0; i < XPOINT_COUNT; ++i)
+    {
+        float y = i * CELL_SIZE;
+        line(0, y, WIDTH, y);
+    }
+    for (int j = 0; j < YPOINT_COUNT; ++j)
+    {
+        float x = j * CELL_SIZE;
+        line(x, 0, x, HEIGHT);
     }
 }
 
